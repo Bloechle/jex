@@ -511,7 +511,7 @@ export class JexLogger {
 
     #createContainer() {
         this.#dom.root = jex.create('div')
-            .id('jexLoggerConsole')
+            .$('jexLoggerConsole')
             .cls('fixed bottom-0 left-0 right-0 z-[10000] bg-gray-900/95 border-t border-gray-700 backdrop-blur-sm transform translate-y-full transition-transform duration-300 hidden')
             .style({ height: this.#config.defaults.height });
     }
