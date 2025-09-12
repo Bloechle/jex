@@ -20,7 +20,7 @@
 - **Project Name:** Jex
 - **Ignored Paths:** LICENCE, -scanner.js, -Jex.txt, node_modules, .git, dist, build, .idea
 - **Accepted File Extensions:** .js, .css, .html, .jsx, .ts, .tsx, .json, .md
-- **Generated on:** 2025-09-11T19:55:29.414Z
+- **Generated on:** 2025-09-12T07:57:09.786Z
 - **Max File Size:** 10.00 MB
 - **Include Hashes:** Yes
 - **Include Line Count:** Yes
@@ -30,9 +30,9 @@
 The following tree represents the complete project structure:Jex/
 ├── jex-logo.svg (5.50 KB)
 ├── Jex.js (31.53 KB)
-├── JexDebug.js (18.52 KB)
-├── JexLogger.js (20.89 KB)
-├── JexToast.js (16.14 KB)
+├── JexInspector.js (17.51 KB)
+├── JexLogger.js (24.11 KB)
+├── JexToast.js (16.27 KB)
 ├── LICENSE (1.07 KB)
 └── README.md (9.04 KB)
 
@@ -1076,107 +1076,104 @@ export const jex = new Jex();
 
 
 ================================================================================
-FILE: JexDebug.js
+FILE: JexInspector.js
 Type: JS
-Size: 18.52 KB
-Last Modified: 2025-09-11T19:53:48.797Z
-Lines: 539
-MD5: 7678880255c7d33209e1bca54ba6a081
+Size: 17.51 KB
+Last Modified: 2025-09-12T07:51:29.465Z
+Lines: 526
+MD5: 0b0b5f443343042ec7c41edd5225dccf
 ================================================================================
 
 /**
- * JexDebug.js - Visual debugging tools for Jex Framework
+ * JexInspector.js - Visual element inspection tool for Jex ecosystem
  *
  * CLASS STRUCTURE:
  * ---------------
  * Public Fields:
- *   - isEnabled {boolean}: Whether debug mode is active
- *   - options {Object}: Configuration options (toggleKey, enabled)
+ *   - isEnabled {boolean}: Whether inspector mode is active
+ *   - options {Object}: Configuration options (toggleKey, enabled, showTooltip)
  *
  * Private Fields:
- *   - #container {Jex}: Parent container for all debug elements
- *   - #dom {Object}: DOM element references
- *   - #hoveredElement {Element}: Currently hovered element
- *   - #cleanupDocEvents {Function}: Cleanup function for document events
- *   - #cleanupWinEvents {Function}: Cleanup function for window events
- *   - #cleanupKeyboard {Function}: Cleanup function for keyboard events
- *   - #cleanupConsoleEvents {Function}: Cleanup function for console events
+ *   - #container {Jex}: Parent container for all overlay elements
+ *   - #overlays {Object}: DOM overlay element references
+ *   - #tooltip {Jex}: Tooltip element reference
+ *   - #hoveredElement {Element}: Currently inspected element
+ *   - #eventCleanup {Object}: Event cleanup functions
  *
  * Public Methods:
- *   - enable(): void - Enable debug mode
- *   - disable(): void - Disable debug mode
- *   - toggle(): void - Toggle debug mode
- *   - setupKeyboardShortcuts(): void - Setup keyboard shortcuts
+ *   - enable(): void - Enable inspector mode
+ *   - disable(): void - Disable inspector mode
+ *   - toggle(): void - Toggle inspector mode
  *   - setEnabled(enabled: boolean): void - Enable/disable keyboard shortcuts
  *   - setToggleKey(key: string): void - Set the toggle key
  *   - destroy(): void - Clean up all resources
  *
- * Public Constants:
- *   - DEBUG_VERSION: Current version of JexDebug
- *
  * Dependencies:
- *   - Jex: For DOM manipulation
- *   - JexLogger: For console integration
+ *   - Jex: For DOM manipulation and event handling
+ *   - JexLogger: For console integration (logger)
  *
  * Relations:
- *   - Part of: Jex Framework
- *   - Used by: Jex Framework applications
+ *   - Part of: Jex ecosystem
+ *   - Used by: Jex-based applications
  *   - Uses: jex from Jex.js, logger from JexLogger.js
  *
- * Last Modified: 2025-09-11 - Renamed from TopDebug to JexDebug
+ * Last Modified: 2025-01-13 - Fixed highlighting issues and updated IDs
  */
 
 import { jex } from './Jex.js';
 import { logger } from './JexLogger.js';
 
 // Version constant
-export const DEBUG_VERSION = '2025.09.11';
+export const INSPECTOR_VERSION = '2025.01.13';
 
-export class JexDebug {
+export class JexInspector {
     // Private fields
     #container = null;
-    #dom = {};
+    #overlays = {};
+    #tooltip = null;
     #hoveredElement = null;
-    #cleanupDocEvents = null;
-    #cleanupWinEvents = null;
-    #cleanupKeyboard = null;
-    #cleanupConsoleEvents = null;
+    #eventCleanup = {};
 
     constructor(options = {}) {
-        // Debug state
+        // Inspector state
         this.isEnabled = false;
 
         // Configuration options
         this.options = {
-            toggleKey: 'F3',
+            toggleKey: 'F2',
             enabled: true,
             showTooltip: true,
             ...options
         };
 
-        // Add stripe pattern styles
+        this.#init();
+    }
+
+    #init() {
         this.#injectStyles();
-
-        // Create main container and debug elements
         this.#createContainer();
-        this.#createDebugElements();
+        this.#createOverlays();
 
-        // Listen to console events
-        this.#cleanupConsoleEvents = jex.onWindow({
+        if (this.options.showTooltip) {
+            this.#createTooltip();
+        }
+
+        // Listen to logger console events
+        this.#eventCleanup.console = jex.onWindow({
             'jex:console:show': () => this.enable(),
             'jex:console:hide': () => this.disable()
         });
 
-        // Setup keyboard shortcuts if enabled
+        // Setup keyboard shortcuts
         if (this.options.enabled) {
-            this.setupKeyboardShortcuts();
+            this.#setupKeyboard();
         }
     }
 
     #injectStyles() {
-        jex.injectStyles('jexDebugStyles', `
+        jex.injectStyles('jexInspectorStyles', `
             /* Static stripes for margins */
-            .jex-debug-stripes {
+            .jex-inspector-stripes {
                 background-image: repeating-linear-gradient(
                     45deg,
                     transparent,
@@ -1187,7 +1184,7 @@ export class JexDebug {
             }
             
             /* Animated stripes for element background */
-            .jex-debug-stripes-animated {
+            .jex-inspector-stripes-animated {
                 background-image: repeating-linear-gradient(
                     45deg,
                     transparent,
@@ -1195,396 +1192,389 @@ export class JexDebug {
                     rgba(59, 130, 246, 0.15) 10px,
                     rgba(59, 130, 246, 0.15) 20px
                 );
-                background-size: 28.28px 28.28px; /* sqrt(2) * 20px for smooth animation */
-                animation: jex-debug-stripes-move 1s linear infinite;
+                background-size: 28.28px 28.28px;
+                animation: jex-inspector-move 1s linear infinite;
             }
             
-            @keyframes jex-debug-stripes-move {
+            @keyframes jex-inspector-move {
                 0% { background-position: 0 0; }
-                100% { background-position: 28.28px 28.28px; }
-            }
-            
-            /* Tooltip styles */
-            .jex-debug-tooltip {
-                position: fixed;
-                z-index: 10000;
-                background: rgba(0, 0, 0, 0.9);
-                color: #fff;
-                padding: 8px 12px;
-                border-radius: 4px;
-                font-size: 12px;
-                font-family: monospace;
-                pointer-events: none;
-                white-space: nowrap;
-                max-width: 400px;
-                overflow: hidden;
-                text-overflow: ellipsis;
-                border: 1px solid rgba(59, 130, 246, 0.5);
-            }
-            
-            /* Element highlighting */
-            .jex-debug-highlight {
-                outline: 2px solid #3b82f6 !important;
-                outline-offset: -2px !important;
-                position: relative !important;
-            }
-            
-            .jex-debug-highlight::after {
-                content: '';
-                position: absolute;
-                top: 0;
-                left: 0;
-                right: 0;
-                bottom: 0;
-                background: rgba(59, 130, 246, 0.1);
-                pointer-events: none;
-                z-index: 1;
+                100% { background-position: 28.28px 0; }
             }
         `);
     }
 
     #createContainer() {
-        this.#container = jex.create('div')
-            .id('jexDebugContainer')
-            .cls('fixed inset-0 pointer-events-none z-[9999]')
-            .style({ display: 'none' });
+        this.#container = jex.create('div', 'jexInspectorContainer')
+            .cls('fixed inset-0 pointer-events-none z-[9995] hidden')
+            .mountToBody();
     }
 
-    #createDebugElements() {
-        // Margin/padding overlays
-        this.#dom.marginTop = jex.create('div').cls('absolute jex-debug-stripes').appendTo(this.#container);
-        this.#dom.marginRight = jex.create('div').cls('absolute jex-debug-stripes').appendTo(this.#container);
-        this.#dom.marginBottom = jex.create('div').cls('absolute jex-debug-stripes').appendTo(this.#container);
-        this.#dom.marginLeft = jex.create('div').cls('absolute jex-debug-stripes').appendTo(this.#container);
+    #createOverlays() {
+        const baseClasses = 'absolute pointer-events-none transition-opacity duration-150';
 
-        this.#dom.paddingTop = jex.create('div').cls('absolute jex-debug-stripes-animated').appendTo(this.#container);
-        this.#dom.paddingRight = jex.create('div').cls('absolute jex-debug-stripes-animated').appendTo(this.#container);
-        this.#dom.paddingBottom = jex.create('div').cls('absolute jex-debug-stripes-animated').appendTo(this.#container);
-        this.#dom.paddingLeft = jex.create('div').cls('absolute jex-debug-stripes-animated').appendTo(this.#container);
+        // Margin overlays with stripes
+        const marginClasses = `${baseClasses} bg-blue-400/10 border border-blue-400/50 jex-inspector-stripes`;
 
-        // Content area
-        this.#dom.content = jex.create('div')
-            .cls('absolute border-2 border-blue-500 border-dashed')
-            .appendTo(this.#container);
+        this.#overlays.marginTop = this.#container.add('div', 'jexInspectorMarginTop')
+            .cls(marginClasses);
+        this.#overlays.marginRight = this.#container.add('div', 'jexInspectorMarginRight')
+            .cls(marginClasses);
+        this.#overlays.marginBottom = this.#container.add('div', 'jexInspectorMarginBottom')
+            .cls(marginClasses);
+        this.#overlays.marginLeft = this.#container.add('div', 'jexInspectorMarginLeft')
+            .cls(marginClasses);
 
-        // Tooltip
-        this.#dom.tooltip = jex.create('div')
-            .cls('jex-debug-tooltip')
-            .style({ display: 'none' })
+        // Element background with animated stripes
+        this.#overlays.elementBg = this.#container.add('div', 'jexInspectorElementBg')
+            .cls(`${baseClasses} bg-blue-400/20 jex-inspector-stripes-animated`);
+
+        // Border indicator with glow
+        this.#overlays.border = this.#container.add('div', 'jexInspectorBorder')
+            .cls(`${baseClasses} border-2 border-blue-600 shadow-[0_0_20px_rgba(59,130,246,0.8),0_0_40px_rgba(59,130,246,0.4)]`);
+
+        // Content box
+        this.#overlays.content = this.#container.add('div', 'jexInspectorContent')
+            .cls(`${baseClasses} border border-blue-500 shadow-[inset_0_0_10px_rgba(59,130,246,0.3)]`);
+    }
+
+    #createTooltip() {
+        this.#tooltip = jex.create('div', 'jexInspectorTooltip')
+            .cls('fixed pointer-events-none hidden z-[10001] px-3 py-2 rounded-md text-xs ' +
+                'bg-black/90 border border-blue-500/50 shadow-xl shadow-blue-500/20 font-mono ' +
+                'backdrop-blur-sm')
             .mountToBody();
-
-        // Info panel
-        this.#dom.infoPanel = jex.create('div')
-            .cls('fixed top-4 right-4 bg-black/90 text-white p-4 rounded-lg font-mono text-sm border border-blue-500')
-            .style({
-                zIndex: '10001',
-                minWidth: '300px',
-                display: 'none'
-            })
-            .html(`
-                <div class="flex items-center justify-between mb-2">
-                    <span class="text-blue-400 font-semibold">Jex Debug Panel</span>
-                    <button id="jexDebugClose" class="text-red-400 hover:text-red-300 ml-4">✕</button>
-                </div>
-                <div class="space-y-1 text-xs">
-                    <div><span class="text-yellow-400">F3:</span> Toggle debug mode</div>
-                    <div><span class="text-yellow-400">ESC:</span> Disable debug mode</div>
-                    <div><span class="text-yellow-400">Hover:</span> Inspect elements</div>
-                </div>
-                <div id="jexDebugElementInfo" class="mt-3 pt-3 border-t border-gray-600">
-                    <div class="text-gray-400">Hover over elements to inspect</div>
-                </div>
-            `)
-            .mountToBody();
-
-        // Close button handler
-        this.#dom.infoPanel.find('#jexDebugClose').on('click', () => this.disable());
     }
 
     enable() {
         if (this.isEnabled) return;
-
         this.isEnabled = true;
-        logger.info('Jex Debug mode enabled (Press F3 to toggle, ESC to disable)');
 
-        // Show container and info panel
-        this.#container.style({ display: 'block' }).mountToBody();
-        this.#dom.infoPanel.style({ display: 'block' });
+        // Show container
+        this.#container?.cls('-hidden');
 
-        // Setup event listeners
-        this.#setupEventListeners();
+        // Attach mouse events with capture phase for better detection
+        this.#eventCleanup.document = jex.onDocument({
+            'mouseover': (e) => this.#onMouseOver(e),
+            'mousemove': (e) => this.#onMouseMove(e),
+            'mouseout': (e) => this.#onMouseOut(e)
+        }, true); // capture phase = true
+
+        // Window scroll event
+        this.#eventCleanup.window = jex.onWindow('scroll', () => this.#onScroll(), true);
     }
 
     disable() {
         if (!this.isEnabled) return;
-
         this.isEnabled = false;
-        logger.info('Jex Debug mode disabled');
 
-        // Hide elements
-        this.#container.style({ display: 'none' });
-        this.#dom.infoPanel.style({ display: 'none' });
-        this.#dom.tooltip.style({ display: 'none' });
+        // Clean up events
+        this.#eventCleanup.document?.();
+        this.#eventCleanup.window?.();
+        this.#eventCleanup.document = null;
+        this.#eventCleanup.window = null;
 
-        // Remove highlighting from previously hovered element
-        if (this.#hoveredElement) {
-            this.#hoveredElement.classList.remove('jex-debug-highlight');
-            this.#hoveredElement = null;
-        }
-
-        // Clean up event listeners
-        this.#cleanupDocEvents?.();
-        this.#cleanupWinEvents?.();
+        // Hide container and tooltip
+        this.#container?.cls('+hidden');
+        this.#tooltip?.cls('+hidden');
+        this.#hideOverlays();
     }
 
     toggle() {
-        if (this.isEnabled) {
-            this.disable();
-        } else {
-            this.enable();
-        }
+        this.isEnabled ? this.disable() : this.enable();
     }
 
-    #setupEventListeners() {
-        // Document events
-        this.#cleanupDocEvents = jex.onDocument({
-            mouseover: (e) => this.#handleMouseOver(e),
-            mouseout: (e) => this.#handleMouseOut(e),
-            mousemove: (e) => this.#handleMouseMove(e),
-            click: (e) => this.#handleClick(e)
-        });
-
-        // Window events
-        this.#cleanupWinEvents = jex.onWindow({
-            resize: () => this.#updateDebugInfo(),
-            scroll: () => this.#updateDebugInfo()
-        });
-    }
-
-    #handleMouseOver(e) {
+    #onMouseOver(e) {
         if (!this.isEnabled) return;
 
         const target = e.target;
 
-        // Skip debug elements
-        if (target.closest('#jexDebugContainer') ||
-            target.closest('.jex-debug-tooltip') ||
-            target.closest('#jexDebugInfoPanel')) {
+        // Skip inspector elements and logger console
+        if (!target ||
+            target.id?.startsWith('jexInspector') ||
+            target.closest('#jexLoggerConsole') ||
+            target.closest('#jexInspectorContainer')) {
             return;
         }
 
-        // Remove highlight from previous element
-        if (this.#hoveredElement) {
-            this.#hoveredElement.classList.remove('jex-debug-highlight');
-        }
-
-        // Add highlight to current element
         this.#hoveredElement = target;
-        target.classList.add('jex-debug-highlight');
-
-        // Update debug visualization
-        this.#updateDebugVisualization(target);
-        this.#updateElementInfo(target);
-        this.#showTooltip(e, target);
+        this.#showInspection(target);
     }
 
-    #handleMouseOut(e) {
-        if (!this.isEnabled) return;
-
-        // Only hide tooltip, keep other visualizations for stability
-        this.#dom.tooltip.style({ display: 'none' });
-    }
-
-    #handleMouseMove(e) {
+    #onMouseMove(e) {
         if (!this.isEnabled || !this.options.showTooltip) return;
 
         // Update tooltip position
-        this.#dom.tooltip.style({
-            left: `${e.clientX + 10}px`,
-            top: `${e.clientY - 30}px`
-        });
+        if (this.#tooltip && !this.#tooltip.cls('?hidden')) {
+            this.#positionTooltip(e.clientX, e.clientY);
+        }
     }
 
-    #handleClick(e) {
+    #onMouseOut(e) {
         if (!this.isEnabled) return;
 
-        // Prevent default action when debugging
-        e.preventDefault();
-        e.stopPropagation();
-
-        const target = e.target;
-        logger.info('Clicked element:', {
-            tagName: target.tagName,
-            id: target.id,
-            className: target.className,
-            element: target
-        });
+        // Check if we're leaving the hovered element
+        if (e.target === this.#hoveredElement) {
+            this.#hoveredElement = null;
+            this.#hideOverlays();
+        }
     }
 
-    #updateDebugVisualization(element) {
-        const rect = element.getBoundingClientRect();
-        const computedStyle = window.getComputedStyle(element);
+    #onScroll() {
+        if (!this.isEnabled || !this.#hoveredElement) return;
 
-        // Parse margins and paddings
+        // Check if element is still in the DOM
+        if (!this.#hoveredElement.isConnected) {
+            this.#hoveredElement = null;
+            this.#hideOverlays();
+            return;
+        }
+
+        // Update overlay positions
+        this.#showInspection(this.#hoveredElement);
+    }
+
+    #showInspection(element) {
+        const rect = element.getBoundingClientRect();
+        const computed = window.getComputedStyle(element);
+
+        // Get box model values
         const margin = {
-            top: parseInt(computedStyle.marginTop) || 0,
-            right: parseInt(computedStyle.marginRight) || 0,
-            bottom: parseInt(computedStyle.marginBottom) || 0,
-            left: parseInt(computedStyle.marginLeft) || 0
+            top: parseFloat(computed.marginTop) || 0,
+            right: parseFloat(computed.marginRight) || 0,
+            bottom: parseFloat(computed.marginBottom) || 0,
+            left: parseFloat(computed.marginLeft) || 0
+        };
+
+        const border = {
+            top: parseFloat(computed.borderTopWidth) || 0,
+            right: parseFloat(computed.borderRightWidth) || 0,
+            bottom: parseFloat(computed.borderBottomWidth) || 0,
+            left: parseFloat(computed.borderLeftWidth) || 0
         };
 
         const padding = {
-            top: parseInt(computedStyle.paddingTop) || 0,
-            right: parseInt(computedStyle.paddingRight) || 0,
-            bottom: parseInt(computedStyle.paddingBottom) || 0,
-            left: parseInt(computedStyle.paddingLeft) || 0
+            top: parseFloat(computed.paddingTop) || 0,
+            right: parseFloat(computed.paddingRight) || 0,
+            bottom: parseFloat(computed.paddingBottom) || 0,
+            left: parseFloat(computed.paddingLeft) || 0
         };
 
-        // Position margin overlays
-        this.#dom.marginTop.style({
-            left: `${rect.left - margin.left}px`,
-            top: `${rect.top - margin.top}px`,
-            width: `${rect.width + margin.left + margin.right}px`,
-            height: `${margin.top}px`
-        });
+        // Make all elements visible
+        this.#showAllOverlays();
 
-        this.#dom.marginRight.style({
-            left: `${rect.right}px`,
-            top: `${rect.top - margin.top}px`,
-            width: `${margin.right}px`,
-            height: `${rect.height + margin.top + margin.bottom}px`
-        });
+        // Position margin indicators
+        this.#positionMargins(rect, margin);
 
-        this.#dom.marginBottom.style({
-            left: `${rect.left - margin.left}px`,
-            top: `${rect.bottom}px`,
-            width: `${rect.width + margin.left + margin.right}px`,
-            height: `${margin.bottom}px`
-        });
-
-        this.#dom.marginLeft.style({
-            left: `${rect.left - margin.left}px`,
-            top: `${rect.top - margin.top}px`,
-            width: `${margin.left}px`,
-            height: `${rect.height + margin.top + margin.bottom}px`
-        });
-
-        // Position padding overlays
-        this.#dom.paddingTop.style({
+        // Position element background with animated stripes
+        this.#overlays.elementBg.style({
             left: `${rect.left}px`,
             top: `${rect.top}px`,
             width: `${rect.width}px`,
-            height: `${padding.top}px`
-        });
-
-        this.#dom.paddingRight.style({
-            left: `${rect.right - padding.right}px`,
-            top: `${rect.top}px`,
-            width: `${padding.right}px`,
             height: `${rect.height}px`
         });
 
-        this.#dom.paddingBottom.style({
-            left: `${rect.left}px`,
-            top: `${rect.bottom - padding.bottom}px`,
+        // Position border box (2px border, so offset by -2)
+        this.#overlays.border.style({
+            left: `${rect.left - 2}px`,
+            top: `${rect.top - 2}px`,
             width: `${rect.width}px`,
-            height: `${padding.bottom}px`
-        });
-
-        this.#dom.paddingLeft.style({
-            left: `${rect.left}px`,
-            top: `${rect.top}px`,
-            width: `${padding.left}px`,
             height: `${rect.height}px`
         });
 
-        // Position content area
-        this.#dom.content.style({
-            left: `${rect.left + padding.left}px`,
-            top: `${rect.top + padding.top}px`,
-            width: `${rect.width - padding.left - padding.right}px`,
-            height: `${rect.height - padding.top - padding.bottom}px`
-        });
-    }
+        // Position content box
+        const contentWidth = rect.width - border.left - border.right - padding.left - padding.right;
+        const contentHeight = rect.height - border.top - border.bottom - padding.top - padding.bottom;
 
-    #updateElementInfo(element) {
-        const rect = element.getBoundingClientRect();
-        const computedStyle = window.getComputedStyle(element);
-
-        const info = {
-            tagName: element.tagName.toLowerCase(),
-            id: element.id || 'none',
-            classes: element.className || 'none',
-            dimensions: `${Math.round(rect.width)}×${Math.round(rect.height)}`,
-            position: `${Math.round(rect.left)}, ${Math.round(rect.top)}`,
-            margin: `${computedStyle.margin}`,
-            padding: `${computedStyle.padding}`,
-            display: computedStyle.display,
-            position_type: computedStyle.position
-        };
-
-        const infoHtml = `
-            <div class="text-blue-400 font-semibold mb-2">&lt;${info.tagName}&gt;</div>
-            <div class="space-y-1">
-                <div><span class="text-yellow-400">ID:</span> ${info.id}</div>
-                <div><span class="text-yellow-400">Classes:</span> ${info.classes}</div>
-                <div><span class="text-yellow-400">Size:</span> ${info.dimensions}</div>
-                <div><span class="text-yellow-400">Position:</span> ${info.position}</div>
-                <div><span class="text-yellow-400">Display:</span> ${info.display}</div>
-                <div><span class="text-yellow-400">Position:</span> ${info.position_type}</div>
-                <div><span class="text-yellow-400">Margin:</span> ${info.margin}</div>
-                <div><span class="text-yellow-400">Padding:</span> ${info.padding}</div>
-            </div>
-        `;
-
-        this.#dom.infoPanel.find('#jexDebugElementInfo').html(infoHtml);
-    }
-
-    #showTooltip(e, element) {
-        if (!this.options.showTooltip) return;
-
-        const tagName = element.tagName.toLowerCase();
-        const id = element.id ? `#${element.id}` : '';
-        const classes = element.className ? `.${element.className.split(' ').join('.')}` : '';
-
-        const tooltipText = `${tagName}${id}${classes}`;
-
-        this.#dom.tooltip
-            .text(tooltipText)
-            .style({
-                display: 'block',
-                left: `${e.clientX + 10}px`,
-                top: `${e.clientY - 30}px`
+        if (contentWidth > 0 && contentHeight > 0) {
+            this.#overlays.content.style({
+                left: `${rect.left + border.left + padding.left - 1}px`,
+                top: `${rect.top + border.top + padding.top - 1}px`,
+                width: `${contentWidth}px`,
+                height: `${contentHeight}px`,
+                opacity: '1'
             });
+        } else {
+            this.#overlays.content.style({ opacity: '0' });
+        }
+
+        // Update tooltip
+        if (this.options.showTooltip && this.#tooltip) {
+            this.#updateTooltip(element, margin, border, padding);
+        }
     }
 
-    #updateDebugInfo() {
-        if (!this.isEnabled || !this.#hoveredElement) return;
-        this.#updateDebugVisualization(this.#hoveredElement);
-    }
-
-    setupKeyboardShortcuts() {
-        this.#cleanupKeyboard = jex.onDocument({
-            keydown: (e) => {
-                if (e.key === this.options.toggleKey) {
-                    e.preventDefault();
-                    this.toggle();
-                } else if (e.key === 'Escape' && this.isEnabled) {
-                    e.preventDefault();
-                    this.disable();
-                }
-            }
+    #showAllOverlays() {
+        // Show all overlays by setting opacity to 1
+        Object.values(this.#overlays).forEach(overlay => {
+            overlay.style({ opacity: '1' });
         });
+    }
+
+    #hideOverlays() {
+        // Hide all overlays by setting opacity to 0
+        Object.values(this.#overlays).forEach(overlay => {
+            overlay.style({ opacity: '0' });
+        });
+        this.#tooltip?.cls('+hidden');
+    }
+
+    #positionMargins(rect, margin) {
+        // Helper function to show/hide and position margin elements
+        const setMargin = (overlay, show, styles) => {
+            if (show && styles) {
+                overlay.style({
+                    ...this.#pxStyles(styles),
+                    opacity: '1'
+                });
+            } else {
+                overlay.style({ opacity: '0' });
+            }
+        };
+
+        // Top margin
+        setMargin(this.#overlays.marginTop, margin.top > 0, {
+            left: rect.left - margin.left - 1,
+            top: rect.top - margin.top - 1,
+            width: rect.width + margin.left + margin.right,
+            height: margin.top - 1
+        });
+
+        // Right margin
+        setMargin(this.#overlays.marginRight, margin.right > 0, {
+            left: rect.left + rect.width,
+            top: rect.top - 1,
+            width: margin.right - 1,
+            height: rect.height
+        });
+
+        // Bottom margin
+        setMargin(this.#overlays.marginBottom, margin.bottom > 0, {
+            left: rect.left - margin.left - 1,
+            top: rect.top + rect.height,
+            width: rect.width + margin.left + margin.right,
+            height: margin.bottom - 1
+        });
+
+        // Left margin
+        setMargin(this.#overlays.marginLeft, margin.left > 0, {
+            left: rect.left - margin.left - 1,
+            top: rect.top - 1,
+            width: margin.left - 1,
+            height: rect.height
+        });
+    }
+
+    #pxStyles(styles) {
+        const result = {};
+        Object.entries(styles).forEach(([key, value]) => {
+            result[key] = `${value}px`;
+        });
+        return result;
+    }
+
+    #updateTooltip(element, margin, border, padding) {
+        const tag = element.tagName.toLowerCase();
+        const id = element.id ? `#${element.id}` : '';
+        const classes = element.className ?
+            `.${element.className.trim().split(/\s+/).filter(c => c && !c.startsWith('hover:')).slice(0, 3).join('.')}` : '';
+
+        const rect = element.getBoundingClientRect();
+
+        // Clear and rebuild tooltip content
+        this.#tooltip.clear();
+
+        // Element info section
+        const elementInfo = this.#tooltip.add('div').cls('flex items-center gap-2');
+        elementInfo.add('span').cls('text-blue-300 font-bold').text(`<${tag}>`);
+        if (id) elementInfo.add('span').cls('text-white').text(id);
+        if (classes) elementInfo.add('span').cls('text-gray-400 text-[10px]').text(classes);
+
+        // Dimensions
+        this.#tooltip.add('div')
+            .cls('mt-1 text-white font-medium')
+            .text(`${Math.round(rect.width)} × ${Math.round(rect.height)} px`);
+
+        // Position info
+        this.#tooltip.add('div')
+            .cls('text-gray-500 text-[10px]')
+            .text(`(${Math.round(rect.left)}, ${Math.round(rect.top)})`);
+
+        // Box model info if any values exist
+        const hasBoxModel = margin.top || margin.right || margin.bottom || margin.left ||
+            border.top || border.right || border.bottom || border.left ||
+            padding.top || padding.right || padding.bottom || padding.left;
+
+        if (hasBoxModel) {
+            const boxModel = this.#tooltip.add('div')
+                .cls('mt-2 pt-2 border-t border-gray-700 space-y-0.5');
+
+            // Helper to format box values
+            const addBoxInfo = (label, values, labelColor, valueColor) => {
+                const hasValues = values.top || values.right || values.bottom || values.left;
+                if (hasValues) {
+                    const div = boxModel.add('div').cls('flex items-center gap-2');
+                    div.add('span').cls(`${labelColor} font-bold w-4`).text(label);
+                    div.add('span').cls(`${valueColor} text-[11px] font-mono`)
+                        .text(`${values.top} ${values.right} ${values.bottom} ${values.left}`);
+                }
+            };
+
+            // Use light blue for all box model labels
+            addBoxInfo('M', margin, 'text-blue-300', 'text-gray-300');
+            addBoxInfo('B', border, 'text-blue-300', 'text-gray-300');
+            addBoxInfo('P', padding, 'text-blue-300', 'text-gray-300');
+        }
+
+        this.#tooltip.cls('-hidden');
+    }
+
+    #positionTooltip(mouseX, mouseY) {
+        if (!this.#tooltip) return;
+
+        const tooltip = this.#tooltip.ref;
+        const tooltipRect = tooltip.getBoundingClientRect();
+
+        let left = mouseX + 15;
+        let top = mouseY + 15;
+
+        // Adjust if tooltip would go off screen
+        if (left + tooltipRect.width > window.innerWidth - 10) {
+            left = mouseX - tooltipRect.width - 15;
+        }
+
+        if (top + tooltipRect.height > window.innerHeight - 10) {
+            top = mouseY - tooltipRect.height - 15;
+        }
+
+        this.#tooltip.style({
+            left: `${left}px`,
+            top: `${top}px`
+        });
+    }
+
+    #setupKeyboard() {
+        // Clean up any existing handler first
+        this.#eventCleanup.keyboard = jex.onDocument('keydown',
+            (e) => this.#handleKeyboard(e),
+            { passive: false }
+        );
+    }
+
+    #handleKeyboard(e) {
+        if (e.key === this.options.toggleKey) {
+            e.preventDefault();
+            logger.toggleConsole();
+        }
     }
 
     setEnabled(enabled) {
         this.options.enabled = enabled;
-
-        if (enabled && !this.#cleanupKeyboard) {
-            this.setupKeyboardShortcuts();
-        } else if (!enabled && this.#cleanupKeyboard) {
-            this.#cleanupKeyboard();
-            this.#cleanupKeyboard = null;
+        if (enabled) {
+            this.#setupKeyboard();
+        } else {
+            // Clean up keyboard handler
+            this.#eventCleanup.keyboard?.();
+            this.#eventCleanup.keyboard = null;
         }
     }
 
@@ -1599,43 +1589,40 @@ export class JexDebug {
         // Remove container (which removes all child elements)
         this.#container?.remove();
 
-        // Remove tooltip and info panel separately
-        this.#dom.tooltip?.remove();
-        this.#dom.infoPanel?.remove();
+        // Remove tooltip separately
+        this.#tooltip?.remove();
 
         // Clean up keyboard shortcuts
-        this.#cleanupKeyboard?.();
-        this.#cleanupConsoleEvents?.();
+        this.#eventCleanup.keyboard?.();
+        this.#eventCleanup.console?.();
 
         // Remove pattern styles
-        jex.remove('jexDebugStyles');
+        jex.remove('jexInspectorStyles');
 
         // Clear references
         this.#hoveredElement = null;
         this.#container = null;
-        this.#dom = {};
-        this.#cleanupKeyboard = null;
-        this.#cleanupDocEvents = null;
-        this.#cleanupWinEvents = null;
-        this.#cleanupConsoleEvents = null;
+        this.#overlays = {};
+        this.#tooltip = null;
+        this.#eventCleanup = {};
     }
 }
 
-// Create and export global instance
-export const debug = new JexDebug();
+// Create global instance
+export const inspector = new JexInspector();
 
 
 ================================================================================
 FILE: JexLogger.js
 Type: JS
-Size: 20.89 KB
-Last Modified: 2025-09-11T19:50:15.603Z
-Lines: 648
-MD5: dcb673206a806b8ffbf0777785686831
+Size: 24.11 KB
+Last Modified: 2025-09-12T07:20:42.795Z
+Lines: 704
+MD5: 68f726e29231ded429bec1d4977a849a
 ================================================================================
 
 /**
- * JexLogger.js - Debug console and logging system for Jex Framework
+ * JexLogger.js - Console and logging system for Jex ecosystem
  *
  * CLASS STRUCTURE:
  * ---------------
@@ -1648,6 +1635,7 @@ MD5: dcb673206a806b8ffbf0777785686831
  *   - #state {Object}: Console state (messages, visibility, etc.)
  *   - #dom {Object}: DOM element references
  *   - #messageIndex {number}: Global message counter
+ *   - #tooltipTimeout {number}: Tooltip hide timeout
  *
  * Public Methods:
  *   - toggleConsole(): void - Toggle console visibility
@@ -1655,456 +1643,73 @@ MD5: dcb673206a806b8ffbf0777785686831
  *   - clearConsole(): void - Clear all console messages
  *   - destroy(): void - Clean up and restore original console methods
  *   - info/debug/warn/error/trace(...args): void - Logging methods
- *   - showWelcomeMessage(): void - Show welcome message
- *
- * Public Constants:
- *   - LOGGER_VERSION: Current version of JexLogger
  *
  * Dependencies:
- *   - Jex: For DOM manipulation
+ *   - Jex: For DOM manipulation and event handling
  *
  * Relations:
- *   - Part of: Jex Framework
- *   - Used by: All Jex components and application code
+ *   - Part of: Jex ecosystem
+ *   - Used by: All Jex-based applications
  *   - Uses: jex from Jex.js
  *
- * Last Modified: 2025-09-11 - Renamed from TopLogger to JexLogger
+ * Last Modified: 2025-01-13 - Refactored as JexLogger with DRY improvements
  */
 
 import { jex } from './Jex.js';
 
 // Version constant
-export const LOGGER_VERSION = '2025.09.11';
+export const LOGGER_VERSION = '2025.01.13';
 
 export class JexLogger {
+    // Private fields
     #config = {
         levels: {
-            trace: {
-                textColor: 'text-purple-400',
-                bgColor: 'bg-purple-500/10',
-                borderColor: 'border-l-purple-500',
-                hoverBg: 'hover:bg-purple-500/20',
-                indicatorBg: 'bg-purple-500'
-            },
-            debug: {
-                textColor: 'text-blue-300',
-                bgColor: 'bg-blue-400/10',
-                borderColor: 'border-l-blue-400',
-                hoverBg: 'hover:bg-blue-400/20',
-                indicatorBg: 'bg-blue-400'
-            },
-            info: {
-                textColor: 'text-green-500',
-                bgColor: 'bg-green-600/10',
-                borderColor: 'border-l-green-600',
-                hoverBg: 'hover:bg-green-600/20',
-                indicatorBg: 'bg-green-600'
-            },
-            warn: {
-                textColor: 'text-yellow-400',
-                bgColor: 'bg-yellow-500/10',
-                borderColor: 'border-l-yellow-500',
-                hoverBg: 'hover:bg-yellow-500/20',
-                indicatorBg: 'bg-yellow-500'
-            },
-            error: {
-                textColor: 'text-red-400',
-                bgColor: 'bg-red-500/10',
-                borderColor: 'border-l-red-500',
-                hoverBg: 'hover:bg-red-500/20',
-                indicatorBg: 'bg-red-500'
-            }
+            trace: { color: 'purple', text: 'text-purple-400', bg: 'bg-purple-500/10', border: 'border-l-purple-500', hover: 'hover:bg-purple-500/20', indicator: 'bg-purple-500' },
+            debug: { color: 'blue', text: 'text-blue-300', bg: 'bg-blue-400/10', border: 'border-l-blue-400', hover: 'hover:bg-blue-400/20', indicator: 'bg-blue-400' },
+            info: { color: 'green', text: 'text-green-500', bg: 'bg-green-600/10', border: 'border-l-green-600', hover: 'hover:bg-green-600/20', indicator: 'bg-green-600' },
+            warn: { color: 'yellow', text: 'text-yellow-400', bg: 'bg-yellow-500/10', border: 'border-l-yellow-500', hover: 'hover:bg-yellow-500/20', indicator: 'bg-yellow-500' },
+            error: { color: 'red', text: 'text-red-400', bg: 'bg-red-500/10', border: 'border-l-red-500', hover: 'hover:bg-red-500/20', indicator: 'bg-red-500' }
         },
         defaults: {
             maxLogs: 1000,
             height: '30vh',
-            minHeight: 100,
             maxHeight: window.innerHeight * 0.8,
-            animationDuration: 300,
-            showTimestamp: true,
-            showCaller: true,
-            showIndex: true,
-            groupSimilar: true,
-            showStacktraceOnHover: true
+            animationDuration: 300
         }
     };
 
     #state = {
-        messages: [], // { id, level, args, timestamp, caller, stacktrace, count }
-        messageCount: 0,
-        lastMessage: null,
-        currentFilter: 'all',
-        isConsoleVisible: false,
+        messages: [],
+        isVisible: false,
         isAnimating: false,
-        originals: {} // Store original console methods
+        isMinimized: false,
+        lastHeight: null,
+        lastMessage: null,
+        originals: {}
     };
 
-    #dom = {
-        root: null,
-        header: null,
-        output: null,
-        resizeHandle: null,
-        toggleButton: null,
-        clearButton: null,
-        filterButtons: null,
-        stacktraceTooltip: null,
-        bottomFiller: null
-    };
-
+    #dom = {};
     #messageIndex = 0;
+    #tooltipTimeout = null;
 
-    // Public properties
+    // Public fields
     logLevels = { trace: 0, debug: 1, info: 2, warn: 3, error: 4 };
-    currentLogLevel = 'trace';
+    currentLogLevel = 'debug';
 
-    constructor(options = {}) {
-        this.#config.defaults = { ...this.#config.defaults, ...options };
-        this.#initializeLogger();
+    constructor() {
+        this.#init();
     }
 
-    #initializeLogger() {
-        this.#interceptConsole();
-        this.#initUI();
-        this.#setupKeyboardShortcuts();
-        this.#createBottomFiller();
-        this.showWelcomeMessage();
-    }
-
-    #interceptConsole() {
-        ['info', 'debug', 'warn', 'error', 'trace'].forEach(level => {
-            this.#state.originals[level] = console[level];
-            console[level] = (...args) => {
-                this.#state.originals[level].apply(console, args);
-                this.#addLogMessage(level, args);
-            };
-        });
-
-        // Handle console.log as info
-        this.#state.originals.log = console.log;
-        console.log = (...args) => {
-            this.#state.originals.log.apply(console, args);
-            this.#addLogMessage('info', args);
-        };
-    }
-
-    #setupKeyboardShortcuts() {
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'F2') {
-                e.preventDefault();
-                this.toggleConsole();
-            }
-        });
-    }
-
-    #createBottomFiller() {
-        this.#dom.bottomFiller = jex.create('div')
-            .cls('h-0 transition-all duration-300')
-            .mountToBody();
-    }
-
-    #addLogMessage(level, args) {
-        const timestamp = new Date().toLocaleTimeString();
-        const stacktrace = this.#captureStackTrace();
-        const caller = this.#extractCaller(stacktrace);
-
-        const messageData = this.#formatMessage(level, args, timestamp, caller, stacktrace);
-
-        // Check for grouping
-        if (this.#config.defaults.groupSimilar && this.#state.lastMessage &&
-            this.#state.lastMessage.formatted === messageData.formatted) {
-            this.#state.lastMessage.count++;
-            this.#updateLastMessage();
-            return;
-        }
-
-        const message = {
-            id: ++this.#messageIndex,
-            level,
-            args,
-            timestamp,
-            caller,
-            stacktrace,
-            formatted: messageData.formatted,
-            index: messageData.index,
-            count: 1
-        };
-
-        this.#state.messages.push(message);
-        this.#state.lastMessage = message;
-        this.#state.messageCount++;
-
-        // Limit messages
-        if (this.#state.messages.length > this.#config.defaults.maxLogs) {
-            this.#state.messages.shift();
-        }
-
-        this.#renderMessage(message);
-        this.#scrollToBottom();
-    }
-
-    #captureStackTrace() {
-        const error = new Error();
-        return error.stack || '';
-    }
-
-    #extractCaller(stacktrace) {
-        if (!stacktrace) return '';
-
-        const lines = stacktrace.split('\n');
-        // Skip Error, this method, #addLogMessage, and console method
-        const callerLine = lines[4] || lines[3] || '';
-
-        const match = callerLine.match(/at\s+(.+?)\s+\((.+?):(\d+):(\d+)\)/);
-        if (match) {
-            const [, method, file, line] = match;
-            const fileName = file.split('/').pop();
-            return `${method} (${fileName}:${line})`;
-        }
-
-        const altMatch = callerLine.match(/at\s+(.+?):(\d+):(\d+)/);
-        if (altMatch) {
-            const [, file, line] = altMatch;
-            const fileName = file.split('/').pop();
-            return `${fileName}:${line}`;
-        }
-
-        return '';
-    }
-
-    #formatMessage(level, args, timestamp, caller, stacktrace) {
-        const parts = [];
-
-        if (this.#config.defaults.showIndex) {
-            parts.push(`[${this.#messageIndex}]`);
-        }
-
-        if (this.#config.defaults.showTimestamp) {
-            parts.push(`[${timestamp}]`);
-        }
-
-        parts.push(`[${level.toUpperCase()}]`);
-
-        if (this.#config.defaults.showCaller && caller) {
-            parts.push(`[${caller}]`);
-        }
-
-        const prefix = parts.join(' ');
-        const content = args.map(arg =>
-            typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)
-        ).join(' ');
-
-        return {
-            formatted: `${prefix} ${content}`,
-            index: this.#messageIndex,
-            caller
-        };
-    }
-
-    #renderMessage(message) {
-        if (!this.#shouldShowMessage(message)) return;
-
-        const config = this.#config.levels[message.level];
-        const messageEl = jex.create('div')
-            .cls(`message-item border-l-4 p-3 mb-2 font-mono text-sm cursor-pointer transition-colors ${config.bgColor} ${config.borderColor} ${config.hoverBg}`)
-            .attr('data-level', message.level)
-            .attr('data-id', message.id);
-
-        // Content container
-        const contentEl = jex.create('div').cls(`${config.textColor}`);
-
-        // Add count badge if grouped
-        if (message.count > 1) {
-            const countBadge = jex.create('span')
-                .cls(`inline-block px-2 py-1 text-xs rounded-full mr-2 ${config.indicatorBg} text-white`)
-                .text(message.count);
-            contentEl.append(countBadge);
-        }
-
-        // Message text
-        const textEl = jex.create('pre').cls('whitespace-pre-wrap break-words').text(message.formatted);
-        contentEl.append(textEl);
-
-        messageEl.append(contentEl);
-
-        // Add hover tooltip for stacktrace
-        if (this.#config.defaults.showStacktraceOnHover && message.stacktrace) {
-            this.#setupStacktraceTooltip(messageEl, message);
-        }
-
-        this.#dom.output.append(messageEl);
-    }
-
-    #setupStacktraceTooltip(messageEl, message) {
-        messageEl.on('mouseenter', (e) => {
-            this.#showStacktraceTooltip(e, message.stacktrace);
-        });
-
-        messageEl.on('mouseleave', () => {
-            this.#hideStacktraceTooltip();
-        });
-    }
-
-    #showStacktraceTooltip(e, stacktrace) {
-        if (!this.#dom.stacktraceTooltip) {
-            this.#dom.stacktraceTooltip = jex.create('div')
-                .cls('jex-logger-stacktrace')
-                .mountToBody();
-        }
-
-        const formattedStack = this.#formatStackTrace(stacktrace);
-        this.#dom.stacktraceTooltip.text(formattedStack);
-
-        const rect = e.target.getBoundingClientRect();
-        const tooltipRect = this.#dom.stacktraceTooltip.node.getBoundingClientRect();
-
-        let left = rect.left + 10;
-        let top = rect.bottom + 5;
-
-        // Adjust if tooltip goes off screen
-        if (left + tooltipRect.width > window.innerWidth) {
-            left = window.innerWidth - tooltipRect.width - 10;
-        }
-        if (top + tooltipRect.height > window.innerHeight) {
-            top = rect.top - tooltipRect.height - 5;
-        }
-
-        this.#dom.stacktraceTooltip.style({
-            left: `${left}px`,
-            top: `${top}px`,
-            display: 'block'
-        });
-    }
-
-    #hideStacktraceTooltip() {
-        if (this.#dom.stacktraceTooltip) {
-            this.#dom.stacktraceTooltip.style({ display: 'none' });
-        }
-    }
-
-    #formatStackTrace(stacktrace) {
-        return stacktrace
-            .split('\n')
-            .slice(1) // Skip first line (Error)
-            .map(line => {
-                const trimmed = line.trim();
-                if (!trimmed.startsWith('at ')) return trimmed;
-
-                const match = trimmed.match(/at\s+(.+?)\s+\((.+?):(\d+):(\d+)\)/);
-                if (match) {
-                    const [, method, file, line, col] = match;
-                    const fileName = file.split('/').pop();
-                    return `  → ${method} (${fileName}:${line}:${col})`;
-                }
-
-                const altMatch = trimmed.match(/at\s+(.+?):(\d+):(\d+)/);
-                if (altMatch) {
-                    const [, file, line, col] = altMatch;
-                    const fileName = file.split('/').pop();
-                    return `  → ${fileName}:${line}:${col}`;
-                }
-
-                return `  ${trimmed}`;
-            })
-            .join('\n');
-    }
-
-    #updateLastMessage() {
-        const lastMessageEl = this.#dom.output.node.querySelector(`[data-id="${this.#state.lastMessage.id}"]`);
-        if (lastMessageEl) {
-            lastMessageEl.remove();
-            this.#renderMessage(this.#state.lastMessage);
-        }
-    }
-
-    #shouldShowMessage(message) {
-        if (this.#state.currentFilter === 'all') return true;
-        return message.level === this.#state.currentFilter;
-    }
-
-    #scrollToBottom() {
-        if (this.#dom.output) {
-            this.#dom.output.node.scrollTop = this.#dom.output.node.scrollHeight;
-        }
-    }
-
-    toggleConsole() {
-        if (this.#state.isAnimating) return;
-
-        this.#state.isAnimating = true;
-        this.#state.isConsoleVisible = !this.#state.isConsoleVisible;
-
-        if (this.#state.isConsoleVisible) {
-            this.#dom.root.cls('-hidden');
-            this.#dom.bottomFiller.style({ height: this.#config.defaults.height });
-            setTimeout(() => {
-                this.#dom.root.cls('-translate-y-full');
-                this.#scrollToBottom();
-            }, 10);
-        } else {
-            this.#dom.root.cls('+translate-y-full');
-            this.#dom.bottomFiller.style({ height: '0' });
-        }
-    }
-
-    updateDisplayedMessages() {
-        this.#dom.output.clear();
-        this.#state.messages.forEach(message => {
-            this.#renderMessage(message);
-        });
-        this.#scrollToBottom();
-    }
-
-    clearConsole() {
-        this.#state.messages = [];
-        this.#state.messageCount = 0;
-        this.#state.lastMessage = null;
-        this.#messageIndex = 0;
-        this.#dom.output.clear();
-        this.showWelcomeMessage();
-    }
-
-    destroy() {
-        // Restore original console methods
-        Object.entries(this.#state.originals).forEach(([method, orig]) => {
-            console[method] = orig;
-        });
-
-        // Remove DOM elements
-        this.#dom.root?.remove();
-        this.#dom.bottomFiller?.remove();
-        this.#dom.stacktraceTooltip?.remove();
-
-        jex.remove('jexLoggerStyles');
-
-        // Clear state
-        this.#state.messages = [];
-        this.#state.messageCount = 0;
-        this.#messageIndex = 0;
-    }
-
-    showWelcomeMessage() {
-        console.info('Jex Framework Logger v' + LOGGER_VERSION + ' | Press F2 to toggle console');
-    }
-
-    #initUI() {
+    #init() {
         this.#injectStyles();
-        this.#createContainer();
-        this.#createHeader();
-        this.#createOutputArea();
-        this.#setupResizeHandler();
-
-        this.#dom.root
-            .mountToBody()
-            .on('transitionend', () => {
-                if (!this.#state.isConsoleVisible) {
-                    this.#dom.root.cls('+hidden');
-                }
-                this.#state.isAnimating = false;
-            });
+        this.#createUI();
+        this.#createFiller();
+        this.#interceptConsole();
+        this.#showWelcome();
     }
 
     #injectStyles() {
-        jex.injectStyles('jexLoggerStyles', () => `
+        jex.injectStyles('jexLoggerStyles', `
             #jexLoggerOutput::-webkit-scrollbar {
                 width: 8px;
             }
@@ -2120,7 +1725,7 @@ export class JexLogger {
                 background-color: rgba(156, 163, 175, 0.5);
             }
             
-            .jex-logger-stacktrace {
+            .jex-logger-tooltip {
                 position: fixed;
                 z-index: 10001;
                 background: rgba(0, 0, 0, 0.95);
@@ -2132,152 +1737,590 @@ export class JexLogger {
                 color: #e5e7eb;
                 white-space: pre;
                 max-width: 600px;
-                max-height: 400px;
+                max-height: 300px;
                 overflow: auto;
-                display: none;
                 pointer-events: none;
+                opacity: 0;
+                transition: opacity 0.2s;
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
             }
             
-            .jex-logger-resize-handle:hover {
-                background-color: rgba(59, 130, 246, 0.3) !important;
+            .jex-logger-tooltip.visible {
+                opacity: 1;
+                pointer-events: auto;
             }
         `);
     }
 
-    #createContainer() {
-        this.#dom.root = jex.create('div')
-            .id('jexLoggerConsole')
-            .cls('fixed bottom-0 left-0 right-0 z-[10000] bg-gray-900/95 border-t border-gray-700 backdrop-blur-sm transform translate-y-full transition-transform duration-300 hidden')
-            .style({ height: this.#config.defaults.height });
+    #createUI() {
+        // Main console container
+        this.#dom.root = jex.create('div', 'jexLoggerConsole')
+            .cls('fixed inset-x-0 bottom-0 bg-gray-900 z-[10000] hidden transform translate-y-full ' +
+                'transition-transform duration-300 ease-out font-mono shadow-[0_-4px_20px_rgba(0,0,0,0.3)]')
+            .style({ height: this.#config.defaults.height })
+            .mountToBody();
+
+        this.#createHeader();
+        this.#createOutput();
+        this.#createTooltip();
+        this.#setupResize();
+
+        // Handle transition end
+        this.#dom.root.on('transitionend', () => {
+            if (!this.#state.isVisible) {
+                this.#dom.root.cls('+hidden');
+            }
+            this.#state.isAnimating = false;
+        });
     }
 
     #createHeader() {
-        this.#dom.header = jex.create('div')
-            .cls('flex items-center justify-between p-2 bg-gray-800/90 border-b border-gray-700')
-            .appendTo(this.#dom.root);
+        const header = this.#dom.root.add('div', 'jexLoggerHeader')
+            .cls('flex items-center justify-between px-3 py-1.5 bg-gray-800 border-b border-gray-700 cursor-ns-resize h-8');
 
-        // Left side - Title and filters
-        const leftSide = jex.create('div').cls('flex items-center space-x-2');
+        // Left section
+        const left = header.add('div').cls('flex items-center gap-4');
 
-        jex.create('span')
-            .cls('text-white font-semibold text-sm')
-            .text('Jex Logger')
-            .appendTo(leftSide);
+        this.#dom.title = left.add('span')
+            .cls('text-gray-300 text-sm font-medium cursor-pointer hover:text-gray-100 transition-colors select-none')
+            .text('Debug Console')
+            .attr('title', 'Click to clear console')
+            .onClick(() => this.clearConsole());
 
-        // Filter buttons
-        const filterContainer = jex.create('div').cls('flex space-x-1');
+        this.#dom.messageCount = left.add('span')
+            .cls('text-gray-500 text-xs')
+            .text('0 messages');
 
-        ['all', 'trace', 'debug', 'info', 'warn', 'error'].forEach(level => {
-            const btn = jex.create('button')
-                .cls(`px-2 py-1 text-xs rounded transition-colors ${level === 'all' ? 'bg-blue-600 text-white' : 'bg-gray-700 text-gray-300 hover:bg-gray-600'}`)
-                .text(level.toUpperCase())
-                .on('click', () => this.#setFilter(level))
-                .appendTo(filterContainer);
-        });
-
-        filterContainer.appendTo(leftSide);
-        leftSide.appendTo(this.#dom.header);
-
-        // Right side - Controls
-        const rightSide = jex.create('div').cls('flex items-center space-x-2');
-
-        this.#dom.clearButton = jex.create('button')
-            .cls('px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-xs rounded transition-colors')
-            .text('Clear')
-            .on('click', () => this.clearConsole())
-            .appendTo(rightSide);
-
-        this.#dom.toggleButton = jex.create('button')
-            .cls('px-3 py-1 bg-gray-600 hover:bg-gray-500 text-white text-xs rounded transition-colors')
-            .text('Hide')
-            .on('click', () => this.toggleConsole())
-            .appendTo(rightSide);
-
-        rightSide.appendTo(this.#dom.header);
-
-        // Resize handle
-        this.#dom.resizeHandle = jex.create('div')
-            .cls('jex-logger-resize-handle absolute top-0 left-0 right-0 h-1 bg-gray-600/50 cursor-ns-resize transition-colors')
-            .appendTo(this.#dom.root);
+        // Right section
+        const right = header.add('div').cls('flex items-center gap-3');
+        this.#createLevelSelector(right);
+        this.#createCloseButton(right);
     }
 
-    #createOutputArea() {
-        this.#dom.output = jex.create('div')
-            .id('jexLoggerOutput')
-            .cls('flex-1 overflow-y-auto p-2 text-gray-300')
-            .style({ height: 'calc(100% - 40px)' })
-            .appendTo(this.#dom.root);
+    #createLevelSelector(parent) {
+        this.#dom.levelIndicator = parent.add('div')
+            .cls('flex items-center gap-1.5 px-3 py-1 bg-gray-700 rounded text-xs cursor-pointer ' +
+                'hover:bg-gray-600 transition-all duration-200 select-none')
+            .attr('title', 'Click to change log level')
+            .onClick(() => this.#cycleLogLevel());
+
+        this.#dom.levelSquare = this.#dom.levelIndicator.add('span')
+            .cls(`inline-block w-3 h-3 rounded-sm ${this.#config.levels[this.currentLogLevel].indicator}`);
+
+        this.#dom.levelText = this.#dom.levelIndicator.add('span')
+            .cls('text-gray-300 font-medium uppercase tracking-wider')
+            .text(this.currentLogLevel);
+
+        this.#dom.levelIndicator.add('span')
+            .cls('text-gray-500')
+            .html('<i class="fas fa-chevron-down text-[10px]"></i>');
     }
 
-    #setupResizeHandler() {
-        let isResizing = false;
-        let startY = 0;
-        let startHeight = 0;
+    #createCloseButton(parent) {
+        parent.add('button')
+            .cls('text-gray-400 px-2 text-sm opacity-80 hover:opacity-100 hover:text-gray-200 ' +
+                'transition-all bg-transparent border-0 cursor-pointer')
+            .html('✕')
+            .attr('title', 'Close Console (F2)')
+            .onClick(() => this.toggleConsole());
+    }
 
-        this.#dom.resizeHandle.on('mousedown', (e) => {
-            isResizing = true;
-            startY = e.clientY;
-            startHeight = this.#dom.root.node.offsetHeight;
-            document.body.style.cursor = 'ns-resize';
+    #createOutput() {
+        this.#dom.output = this.#dom.root.add('div', 'jexLoggerOutput')
+            .cls('p-3 overflow-y-auto bg-black text-gray-300')
+            .style({ height: 'calc(100% - 32px)' });
+    }
+
+    #createTooltip() {
+        this.#dom.tooltip = jex.create('div', 'jexLoggerTooltip')
+            .cls('jex-logger-tooltip')
+            .mountToBody();
+    }
+
+    #createFiller() {
+        this.#dom.filler = jex.create('div', 'jexLoggerFiller')
+            .cls('w-full block transition-[height] duration-300 ease-out')
+            .style({ height: '0px' })
+            .mountToBody();
+    }
+
+    #setupResize() {
+        this.#dom.root.select('#jexLoggerHeader').on('mousedown', (e) => {
+            const startY = e.clientY;
+            const startHeight = parseInt(getComputedStyle(this.#dom.root.ref).height);
+
+            const resize = (e) => {
+                const delta = startY - e.clientY;
+                const newHeight = Math.min(Math.max(startHeight + delta, 32), this.#config.defaults.maxHeight);
+                this.#dom.root.style({ height: `${newHeight}px` });
+                this.#dom.filler.style({ height: `${newHeight}px` });
+            };
+
+            const stopResize = () => {
+                cleanupMove();
+                cleanupUp();
+
+                const finalHeight = parseInt(getComputedStyle(this.#dom.root.ref).height);
+
+                if (finalHeight <= 50) {
+                    this.#dom.root.style({ height: '32px' });
+                    this.#dom.filler.style({ height: '32px' });
+                    this.#dom.output.cls('+hidden');
+                    this.#state.isMinimized = true;
+                } else {
+                    this.#state.lastHeight = `${finalHeight}px`;
+                    this.#dom.output.cls('-hidden');
+                    this.#state.isMinimized = false;
+                }
+            };
+
+            const cleanupMove = jex.onDocument('mousemove', resize);
+            const cleanupUp = jex.onDocument('mouseup', stopResize);
             e.preventDefault();
         });
-
-        document.addEventListener('mousemove', (e) => {
-            if (!isResizing) return;
-
-            const deltaY = startY - e.clientY;
-            const newHeight = Math.max(
-                this.#config.defaults.minHeight,
-                Math.min(this.#config.defaults.maxHeight, startHeight + deltaY)
-            );
-
-            this.#dom.root.style({ height: `${newHeight}px` });
-            this.#dom.bottomFiller.style({ height: `${newHeight}px` });
-        });
-
-        document.addEventListener('mouseup', () => {
-            if (isResizing) {
-                isResizing = false;
-                document.body.style.cursor = '';
-            }
-        });
     }
 
-    #setFilter(level) {
-        this.#state.currentFilter = level;
+    #cycleLogLevel() {
+        const levels = Object.keys(this.#config.levels);
+        const currentIndex = levels.indexOf(this.currentLogLevel);
+        const nextIndex = (currentIndex + 1) % levels.length;
 
-        // Update button styles
-        this.#dom.header.findAll('button').forEach(btn => {
-            const isActive = btn.text().toLowerCase() === level;
-            btn.cls(isActive ?
-                '-bg-gray-700 -text-gray-300 +bg-blue-600 +text-white' :
-                '-bg-blue-600 -text-white +bg-gray-700 +text-gray-300 hover:bg-gray-600'
-            );
-        });
-
+        this.currentLogLevel = levels[nextIndex];
+        this.#updateLevelIndicator();
         this.updateDisplayedMessages();
     }
 
+    #updateLevelIndicator() {
+        this.#dom.levelText?.text(this.currentLogLevel);
+
+        if (this.#dom.levelSquare) {
+            // Remove old indicator class and add new one
+            Object.values(this.#config.levels).forEach(config => {
+                this.#dom.levelSquare.cls(`-${config.indicator}`);
+            });
+            this.#dom.levelSquare.cls(`+${this.#config.levels[this.currentLogLevel].indicator}`);
+        }
+    }
+
+    #interceptConsole() {
+        Object.keys(this.#config.levels).forEach(level => {
+            this.#state.originals[level] = console[level] || console.log;
+
+            console[level] = (...args) => {
+                this.#state.originals[level].apply(console, args);
+
+                const messageData = level === 'trace'
+                    ? this.#formatTraceMessage(level, ...args)
+                    : this.#formatLogMessage(level, ...args);
+
+                this.#addMessage({
+                    level,
+                    text: messageData.formatted,
+                    index: messageData.index,
+                    caller: messageData.caller,
+                    stacktrace: messageData.stacktrace,
+                    timestamp: Date.now(),
+                    count: 1
+                });
+            };
+        });
+    }
+
+    #formatLogMessage(level, ...args) {
+        const time = new Date().toLocaleTimeString('en-US', {
+            hour12: false,
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            fractionalSecondDigits: 3
+        });
+
+        const caller = this.#getCaller();
+        const stacktrace = this.#getStacktrace();
+
+        const formattedArgs = args.map(arg => {
+            if (typeof arg === 'object') {
+                try {
+                    return JSON.stringify(arg, null, 2);
+                } catch (e) {
+                    return String(arg);
+                }
+            }
+            return String(arg);
+        }).join(' ');
+
+        this.#messageIndex++;
+
+        const parts = [
+            level.toUpperCase().padEnd(5),
+            `#${this.#messageIndex}`,
+            `[${time}]`
+        ];
+
+        if (caller && caller !== 'unknown') {
+            parts.push(`<${caller}>`);
+        }
+
+        parts.push('\n' + formattedArgs);
+
+        return {
+            formatted: parts.join(' '),
+            index: this.#messageIndex,
+            caller,
+            stacktrace
+        };
+    }
+
+    #formatTraceMessage(level, ...args) {
+        const baseData = this.#formatLogMessage(level, ...args);
+        const stack = this.#getEnhancedStacktrace();
+
+        return {
+            ...baseData,
+            formatted: `${baseData.formatted}\n${stack}`
+        };
+    }
+
+    #getCaller() {
+        const stack = new Error().stack;
+        const lines = stack.split('\n');
+
+        for (let i = 4; i < lines.length; i++) {
+            const line = lines[i];
+
+            if (line.includes('JexLogger') ||
+                line.includes('console.') ||
+                line.includes('Object.') ||
+                line.includes('Function.')) {
+                continue;
+            }
+
+            const match = line.match(/at\s+(.+?)\s+\((.+?):(\d+):(\d+)\)/) ||
+                line.match(/at\s+(.+?):(\d+):(\d+)/);
+
+            if (match) {
+                const fileName = (match[2] || match[1]).split('/').pop();
+                const lineNum = match[3] || match[2];
+                return `${fileName}:${lineNum}`;
+            }
+        }
+
+        return 'unknown';
+    }
+
+    #getStacktrace() {
+        const stack = new Error().stack;
+        const lines = stack.split('\n').slice(5);
+
+        return lines
+            .filter(line => line.trim() &&
+                !line.includes('JexLogger') &&
+                !line.includes('console.') &&
+                !line.includes('Object.<anonymous>'))
+            .map(line => this.#cleanStackLine(line))
+            .join('\n');
+    }
+
+    #getEnhancedStacktrace() {
+        const stack = new Error().stack;
+        const lines = stack.split('\n').slice(5);
+
+        return lines
+            .filter(line => line.trim() &&
+                !line.includes('JexLogger') &&
+                !line.includes('console.trace'))
+            .map(line => {
+                const trimmed = line.trim();
+                const match = trimmed.match(/at\s+(.+?)\s+\((.+?):(\d+):(\d+)\)/) ||
+                    trimmed.match(/at\s+(.+?):(\d+):(\d+)/);
+
+                if (match) {
+                    const method = match[1] || 'anonymous';
+                    const fileName = (match[2] || match[1]).split('/').pop();
+                    const lineNum = match[3] || match[2];
+                    const colNum = match[4] || match[3];
+                    return `  → ${method} (${fileName}:${lineNum}:${colNum})`;
+                }
+
+                return `  ${trimmed}`;
+            })
+            .join('\n');
+    }
+
+    #cleanStackLine(line) {
+        const match = line.match(/at\s+(.+?)\s+\((.+):(\d+):(\d+)\)/) ||
+            line.match(/at\s+(.+):(\d+):(\d+)/);
+
+        if (match) {
+            const funcName = match[1] || 'anonymous';
+            const fullPath = match[2] || match[1];
+            const lineNum = match[3] || match[2];
+            const colNum = match[4] || match[3];
+            const cleanPath = fullPath.replace(/^https?:\/\/[^\/]+\//, '');
+
+            return funcName !== 'anonymous'
+                ? `at ${funcName} (${cleanPath}:${lineNum}:${colNum})`
+                : `at ${cleanPath}:${lineNum}:${colNum}`;
+        }
+
+        return line;
+    }
+
+    #addMessage(message) {
+        // Group similar messages
+        const lastMsg = this.#state.messages[this.#state.messages.length - 1];
+
+        if (lastMsg &&
+            lastMsg.text === message.text &&
+            lastMsg.level === message.level &&
+            lastMsg.caller === message.caller) {
+            lastMsg.count++;
+            lastMsg.timestamp = Date.now();
+
+            if (this.#state.isVisible) {
+                this.updateDisplayedMessages();
+            }
+            return;
+        }
+
+        this.#state.messages.push(message);
+        this.#state.lastMessage = message;
+
+        if (this.#state.messages.length > this.#config.defaults.maxLogs) {
+            this.#state.messages.shift();
+        }
+
+        if (this.#state.isVisible) {
+            this.updateDisplayedMessages();
+        }
+    }
+
+    updateDisplayedMessages() {
+        const filtered = this.#state.messages.filter(
+            m => this.logLevels[m.level] >= this.logLevels[this.currentLogLevel]
+        );
+
+        // Update message count
+        if (this.#dom.messageCount) {
+            const total = this.#state.messages.length;
+            const shown = filtered.length;
+            const text = total === shown ? `${total} messages` : `${shown} of ${total} messages`;
+            this.#dom.messageCount.text(text);
+        }
+
+        // Clear and rebuild output
+        this.#dom.output.clear();
+
+        filtered.forEach((msg, idx) => {
+            this.#renderMessage(msg, idx);
+        });
+
+        // Scroll to bottom
+        this.#dom.output.ref.scrollTop = this.#dom.output.ref.scrollHeight;
+    }
+
+    #renderMessage(msg, idx) {
+        const levelConfig = this.#config.levels[msg.level];
+
+        const entry = this.#dom.output.add('div', `jexLoggerMessage${idx}`)
+            .cls(`my-0.5 px-2.5 py-1.5 rounded border-l-[3px] relative transition-all duration-200 text-xs cursor-pointer ` +
+                `${levelConfig.bg} ${levelConfig.border} ${levelConfig.text} ${levelConfig.hover}`)
+            .attr('data-stacktrace', msg.stacktrace || '');
+
+        // Add stacktrace hover
+        if (msg.stacktrace) {
+            entry.on('mouseenter', (e) => this.#showTooltip(e, msg.stacktrace));
+            entry.on('mouseleave', () => this.#hideTooltip());
+            entry.on('mousemove', (e) => this.#updateTooltipPosition(e));
+        }
+
+        // Count badge
+        if (msg.count > 1) {
+            entry.add('span')
+                .cls('absolute right-2.5 top-1.5 bg-white/20 text-white px-1.5 py-0.5 rounded-full text-[10px] font-bold')
+                .text(`×${msg.count}`);
+        }
+
+        this.#renderMessageContent(entry, msg, idx);
+    }
+
+    #renderMessageContent(entry, msg, idx) {
+        const lines = msg.text.split('\n');
+        const headerLine = lines[0];
+        const messageLine = lines.slice(1).join('\n');
+
+        // Parse header
+        const headerMatch = headerLine.match(/^(\w+)\s+(#\d+)\s+\[(.*?)\](?:\s+<(.*?)>)?/);
+        if (headerMatch) {
+            const [, level, index, time, caller] = headerMatch;
+
+            const header = entry.add('div').cls('flex items-center gap-2 flex-wrap');
+            header.add('span').cls('font-bold uppercase').text(level);
+
+            if (index) header.add('span').cls('text-gray-400 text-[11px]').text(index);
+            if (time) header.add('span').cls('text-gray-400 text-[11px]').text(`[${time}]`);
+            if (caller && caller !== 'unknown') {
+                header.add('span').cls('text-gray-500 text-[11px] italic').text(`<${caller}>`);
+            }
+
+            if (msg.stacktrace) {
+                header.add('span')
+                    .cls('text-gray-400 text-[10px] ml-1')
+                    .attr('title', 'Hover to see stacktrace')
+                    .html('<i class="fas fa-layer-group"></i>');
+            }
+        }
+
+        // Message content
+        if (messageLine) {
+            const msgDiv = entry.add('div').cls('mt-1 whitespace-pre-wrap break-words');
+
+            if (this.#isJSON(messageLine)) {
+                this.#renderJSON(msgDiv, messageLine);
+            } else {
+                msgDiv.text(messageLine);
+            }
+        }
+    }
+
+    #isJSON(str) {
+        const trimmed = str.trim();
+        return (trimmed.startsWith('{') && trimmed.endsWith('}')) ||
+            (trimmed.startsWith('[') && trimmed.endsWith(']'));
+    }
+
+    #renderJSON(container, jsonStr) {
+        try {
+            const obj = JSON.parse(jsonStr);
+            const formatted = JSON.stringify(obj, null, 2);
+
+            const highlighted = formatted
+                .replace(/"([^"]+)":/g, '<span class="text-pink-400">"$1"</span>:')
+                .replace(/:\s*"([^"]*)"/g, ': <span class="text-green-400">"$1"</span>')
+                .replace(/:\s*(\d+)/g, ': <span class="text-yellow-400">$1</span>')
+                .replace(/:\s*(true|false)/g, ': <span class="text-blue-400">$1</span>')
+                .replace(/:\s*null/g, ': <span class="text-gray-500">null</span>');
+
+            container.html(highlighted);
+        } catch (e) {
+            container.text(jsonStr);
+        }
+    }
+
+    #showTooltip(event, stacktrace) {
+        clearTimeout(this.#tooltipTimeout);
+
+        this.#dom.tooltip.text(stacktrace);
+        this.#dom.tooltip.style({ visibility: 'visible', opacity: '0' });
+
+        this.#updateTooltipPosition(event);
+
+        requestAnimationFrame(() => {
+            this.#dom.tooltip.cls('+visible');
+        });
+    }
+
+    #updateTooltipPosition(event) {
+        const tooltip = this.#dom.tooltip;
+        const rect = tooltip.ref.getBoundingClientRect();
+
+        let left = event.clientX + 15;
+        let top = event.clientY - rect.height - 10;
+
+        if (left + rect.width > window.innerWidth - 10) {
+            left = event.clientX - rect.width - 15;
+        }
+
+        if (top < 10) {
+            top = event.clientY + 15;
+        }
+
+        tooltip.style({
+            left: `${left}px`,
+            top: `${top}px`
+        });
+    }
+
+    #hideTooltip() {
+        this.#tooltipTimeout = setTimeout(() => {
+            this.#dom.tooltip.cls('-visible');
+            setTimeout(() => {
+                this.#dom.tooltip.style({ visibility: 'hidden' });
+            }, 200);
+        }, 100);
+    }
+
+    toggleConsole() {
+        if (this.#state.isAnimating) return;
+
+        this.#state.isAnimating = true;
+        this.#state.isVisible = !this.#state.isVisible;
+
+        setTimeout(() => {
+            this.#state.isAnimating = false;
+        }, this.#config.defaults.animationDuration + 50);
+
+        if (this.#state.isVisible) {
+            this.#dom.root.cls('-hidden');
+
+            requestAnimationFrame(() => {
+                this.#dom.root.cls('-translate-y-full');
+                this.#dom.filler.style({
+                    height: this.#state.lastHeight || this.#config.defaults.height
+                });
+
+                if (this.#state.isMinimized) {
+                    this.#dom.output.cls('-hidden');
+                }
+                this.updateDisplayedMessages();
+            });
+
+            window.dispatchEvent(new CustomEvent('jex:console:show'));
+        } else {
+            this.#dom.root.cls('+translate-y-full');
+            this.#dom.filler.style({ height: '0px' });
+
+            window.dispatchEvent(new CustomEvent('jex:console:hide'));
+        }
+    }
+
+    clearConsole() {
+        this.#state.messages = [];
+        this.#state.lastMessage = null;
+        this.#messageIndex = 0;
+        this.#dom.output.clear();
+        this.#showWelcome();
+    }
+
+    #showWelcome() {
+        console.info('Jex Logger v' + LOGGER_VERSION + ' | Press F2 to toggle console');
+    }
+
+    destroy() {
+        // Restore original console methods
+        Object.entries(this.#state.originals).forEach(([method, orig]) => {
+            console[method] = orig;
+        });
+
+        // Remove DOM elements
+        this.#dom.root?.remove();
+        this.#dom.filler?.remove();
+        this.#dom.tooltip?.remove();
+
+        // Remove styles
+        jex.remove('jexLoggerStyles');
+
+        // Clear state
+        this.#state.messages = [];
+        this.#messageIndex = 0;
+    }
+
     // Convenience logging methods
-    info(...args) {
-        console.info(...args);
-    }
-
-    debug(...args) {
-        (console.debug || console.log).apply(console, args);
-    }
-
-    warn(...args) {
-        console.warn(...args);
-    }
-
-    error(...args) {
-        console.error(...args);
-    }
-
-    trace(...args) {
-        console.trace(...args);
-    }
+    info(...args) { console.info(...args); }
+    debug(...args) { (console.debug || console.log).apply(console, args); }
+    warn(...args) { console.warn(...args); }
+    error(...args) { console.error(...args); }
+    trace(...args) { console.trace(...args); }
 }
 
 // Create and export the logger instance
@@ -2287,10 +2330,10 @@ export const logger = new JexLogger();
 ================================================================================
 FILE: JexToast.js
 Type: JS
-Size: 16.14 KB
-Last Modified: 2025-09-11T19:55:29.303Z
-Lines: 537
-MD5: 5248b38f2065f18889f38be646b8cfeb
+Size: 16.27 KB
+Last Modified: 2025-09-11T19:57:20.452Z
+Lines: 538
+MD5: 8d09747f99e6354f4899f0177e8c4662
 ================================================================================
 
 /**
@@ -2335,8 +2378,9 @@ MD5: 5248b38f2065f18889f38be646b8cfeb
  * Last Modified: 2025-09-11 - Renamed from TopToast to JexToast
  */
 
-import { jex } from './Jex.js';
-import { logger } from './JexLogger.js';
+// Use CDN imports for Jex framework
+import { jex } from 'https://cdn.jsdelivr.net/gh/Bloechle/jex@latest/Jex.js';
+import { logger } from 'https://cdn.jsdelivr.net/gh/Bloechle/jex@latest/JexLogger.js';
 
 export class JexToast {
     // Public fields
@@ -3176,9 +3220,9 @@ MIT License - see [LICENSE](LICENSE) file for details.
 | File | Type | Size | Lines |
 |------|------|------|-------|
 | Jex.js | JS | 31.53 KB | 1022 |
-| JexDebug.js | JS | 18.52 KB | 539 |
-| JexLogger.js | JS | 20.89 KB | 648 |
-| JexToast.js | JS | 16.14 KB | 537 |
+| JexInspector.js | JS | 17.51 KB | 526 |
+| JexLogger.js | JS | 24.11 KB | 704 |
+| JexToast.js | JS | 16.27 KB | 538 |
 | README.md | MD | 9.04 KB | 329 |
 
 
@@ -3186,9 +3230,9 @@ MIT License - see [LICENSE](LICENSE) file for details.
 
 ### Statistics
 - **Files Processed:** 5
-- **Files Skipped:** 39
-- **Total Size:** 96.12 KB
-- **Total Lines:** 3’075
+- **Files Skipped:** 63
+- **Total Size:** 98.46 KB
+- **Total Lines:** 3’119
 - **Processing Time:** 0.06 seconds
 - **Errors:** 0
 - **Warnings:** 0
@@ -3199,8 +3243,8 @@ MIT License - see [LICENSE](LICENSE) file for details.
 
 ### Largest Files
 1. Jex.js - 31.53 KB
-2. JexLogger.js - 20.89 KB
-3. JexDebug.js - 18.52 KB
-4. JexToast.js - 16.14 KB
+2. JexLogger.js - 24.11 KB
+3. JexInspector.js - 17.51 KB
+4. JexToast.js - 16.27 KB
 5. README.md - 9.04 KB
 
