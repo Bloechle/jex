@@ -251,6 +251,11 @@ export class Jex {
         return this;
     }
 
+    id(id)
+    {
+        return this.$(id)
+    }
+
     /**
      * Select element by ID
      * @param {string} id - Element ID (with or without #)
