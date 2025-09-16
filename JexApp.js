@@ -41,7 +41,7 @@
  * Last Modified: 2025-01-16 - Updated to use JexPackage with raw GitHub imports
  */
 
-import jexPackage from 'https://raw.githubusercontent.com/Bloechle/jex/main/JexPackage.js';
+import jexPackage from 'https://cdn.jsdelivr.net/gh/Bloechle/jex@main/JexPackage.js';
 
 /**
  * JexApp - Ultra-simplified app foundation for Jex Framework

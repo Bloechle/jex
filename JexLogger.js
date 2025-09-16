@@ -32,7 +32,7 @@
  * Last Modified: 2025-01-13 - Refactored as JexLogger with DRY improvements
  */
 
-import { jex } from 'https://raw.githubusercontent.com/Bloechle/jex/main/Jex.js';
+import { jex } from 'https://cdn.jsdelivr.net/gh/Bloechle/jex@main/Jex.js';
 
 // Version constant
 export const LOGGER_VERSION = '2025.01.13';
