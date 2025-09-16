@@ -3,205 +3,264 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jex Framework Demo</title>
+    <title>Notes - Jex Framework</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        dark: {
+                            50: '#f8fafc',
+                            100: '#f1f5f9',
+                            200: '#e2e8f0',
+                            300: '#cbd5e1',
+                            400: '#94a3b8',
+                            500: '#64748b',
+                            600: '#475569',
+                            700: '#334155',
+                            800: '#1e293b',
+                            900: '#0f172a',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
 </head>
-<body class="bg-gray-100 min-h-screen p-8">
-<!-- Header -->
-<div class="max-w-2xl mx-auto text-center mb-12">
-    <div class="w-16 h-16 bg-blue-500 rounded-xl mx-auto mb-4 flex items-center justify-center">
-        <span class="text-white font-bold text-2xl">J</span>
-    </div>
-    <h1 class="text-3xl font-bold text-gray-900">Jex Framework</h1>
-    <p class="text-gray-600 mt-2">Lightweight DOM manipulation with zero dependencies</p>
-</div>
+<body class="dark bg-dark-900 text-gray-100 min-h-screen">
 
-<!-- Demo Buttons -->
-<div class="max-w-2xl mx-auto mb-8">
-    <div class="bg-white rounded-xl p-6 shadow-sm">
-        <h2 class="text-lg font-semibold mb-4">Try It Out</h2>
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-            <button id="addBox" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">Add Box</button>
-            <button id="showToast" class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600">Show Toast</button>
-            <button id="logMessage" class="px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600">Log Message</button>
-            <button id="clearAll" class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600">Clear All</button>
+<div class="max-w-2xl mx-auto px-6 py-8">
+
+    <!-- Header -->
+    <div class="text-center mb-8">
+        <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-blue-600 rounded-2xl mx-auto mb-4 flex items-center justify-center shadow-lg">
+            <i data-lucide="notebook-pen" class="w-6 h-6 text-white"></i>
+        </div>
+        <h1 class="text-2xl font-light text-gray-100">Notes</h1>
+        <p class="text-sm text-gray-400 mt-1">Simple, elegant note taking</p>
+    </div>
+
+    <!-- Note Input -->
+    <div class="bg-dark-800 rounded-2xl p-6 mb-8 border border-dark-700">
+        <textarea
+                id="noteInput"
+                placeholder="What's on your mind?"
+                class="w-full bg-transparent text-gray-100 placeholder-gray-500 resize-none border-0 outline-none text-lg leading-relaxed"
+                rows="3"
+        ></textarea>
+        <div class="flex justify-between items-center mt-4 pt-4 border-t border-dark-700">
+            <span id="charCount" class="text-xs text-gray-500">0 characters</span>
+            <button
+                    id="addNote"
+                    class="px-6 py-2 bg-gradient-to-r from-purple-500 to-blue-600 text-white rounded-xl text-sm font-medium hover:shadow-lg transition-all duration-200 transform hover:scale-105"
+            >
+                Save Note
+            </button>
         </div>
     </div>
-</div>
 
-<!-- Demo Area -->
-<div class="max-w-2xl mx-auto">
-    <div id="demoArea" class="bg-white rounded-xl p-8 shadow-sm min-h-[200px] flex items-center justify-center text-gray-500">
-        Click buttons above to see Jex in action!
+    <!-- Notes List -->
+    <div id="notesList" class="space-y-4">
+        <!-- Notes will appear here -->
     </div>
-</div>
 
-<!-- Footer -->
-<div class="max-w-2xl mx-auto text-center mt-8 text-sm text-gray-500">
-    Press <kbd class="px-2 py-1 bg-white rounded border">F2</kbd> for console
+    <!-- Empty State -->
+    <div id="emptyState" class="text-center py-16 text-gray-500">
+        <div class="w-20 h-20 mx-auto mb-6 bg-dark-800 rounded-full flex items-center justify-center border border-dark-700">
+            <i data-lucide="feather" class="w-10 h-10 text-gray-600"></i>
+        </div>
+        <p class="text-lg font-light mb-2 text-gray-400">No notes yet</p>
+        <p class="text-sm text-gray-600">Your thoughts will appear here</p>
+    </div>
 </div>
 
 <script type="module">
     /**
-     * SimpleJexDemo.js - Clean and simple Jex Framework demonstration
+     * NotesApp.js - Minimal elegant note-taking app
      *
      * CLASS STRUCTURE:
      * ---------------
-     * Public Fields:
-     *   - boxCount {number}: Counter for created boxes
-     *
      * Private Fields:
-     *   - #jex {Jex}: Core Jex instance
-     *   - #logger {JexLogger|null}: Logger instance if available
-     *   - #toast {JexToast|null}: Toast instance if available
+     *   - #notes {Array}: Array of note objects
+     *   - #noteCounter {number}: Auto-incrementing note ID
      *
      * Public Methods:
-     *   - init(): Promise<void> - Initialize the demo
-     *   - addBox(): void - Add a colored box to demo area
-     *   - showToast(): void - Display a toast notification
-     *   - logMessage(): void - Log a demo message
-     *   - clearAll(): void - Clear the demo area
+     *   - onInit(): Promise<void> - Setup the notes app
+     *   - addNote(text: string): void - Add a new note
+     *   - deleteNote(noteId: number): void - Delete a note
      *
-     * Dependencies:
-     *   - Jex.js: Core DOM manipulation library
-     *   - JexLogger.js: Logging system (optional)
-     *   - JexToast.js: Toast notifications (optional)
-     *
-     * Relations:
-     *   - Demonstrates: Basic Jex Framework capabilities
-     *   - Uses: Minimal subset of framework features
-     *
-     * Last Modified: 2025-09-16 - Added CDN/Local switching capability
+     * Last Modified: 2025-09-16 - Minimal elegant implementation
      */
 
-    class SimpleJexDemo {
-        // Configuration - Easy switching between CDN and local files
-        static #CDN_BASE = './' //https://cdn.jsdelivr.net/gh/Bloechle/jex@latest';
-        static #LOCAL_BASE = '.';
-        static #USE_CDN = false; // Set to true for CDN, false for local files
+    const { JexApp } = await import('./JexApp.js');
 
-        // Public fields
-        boxCount = 0;
+    class NotesApp extends JexApp {
+        #notes = [];
+        #noteCounter = 1;
 
-        // Private fields
-        #jex = null;
-        #logger = null;
-        #toast = null;
-
-        #getImportPath(filename) {
-            const base = SimpleJexDemo.#USE_CDN ? SimpleJexDemo.#CDN_BASE : SimpleJexDemo.#LOCAL_BASE;
-            return `${base}/${filename}`;
+        constructor() {
+            super({
+                name: 'Notes',
+                version: '1.0.0',
+                enableKeyboardShortcuts: true
+            });
         }
 
-        async init() {
-            console.info(`Loading Jex components from: ${SimpleJexDemo.#USE_CDN ? 'CDN' : 'Local files'}`);
-
-            // Load Jex core (required)
-            try {
-                const { jex } = await import(this.#getImportPath('Jex.js'));
-                this.#jex = jex;
-                console.log('✅ Jex loaded');
-            } catch (error) {
-                console.error('❌ Jex failed to load:', error);
-                return;
-            }
-
-            // Load optional components
-            try {
-                const { logger } = await import(this.#getImportPath('JexLogger.js'));
-                this.#logger = logger;
-                console.log('✅ Logger loaded');
-            } catch (error) {
-                console.log('ℹ️ Logger not available');
-            }
-
-            try {
-                const { toast } = await import(this.#getImportPath('JexToast.js'));
-                this.#toast = toast;
-                this.#toast.mount();
-                console.log('✅ Toast loaded');
-            } catch (error) {
-                console.log('ℹ️ Toast not available');
-            }
-
+        async onInit() {
+            this.#loadNotes();
             this.#setupEvents();
-            lucide.createIcons();
+            this.#render();
+        }
+
+        onReady() {
+            // Silent ready - no toast notification
+            console.log('Notes app ready');
         }
 
         #setupEvents() {
-            this.#jex.$('addBox')?.onClick(() => this.addBox());
-            this.#jex.$('showToast')?.onClick(() => this.showToast());
-            this.#jex.$('logMessage')?.onClick(() => this.logMessage());
-            this.#jex.$('clearAll')?.onClick(() => this.clearAll());
+            const input = this.jex.$('noteInput');
+            const addBtn = this.jex.$('addNote');
 
-            // F2 for console
-            this.#jex.onKey('F2', (e) => {
-                e.preventDefault();
-                if (this.#logger?.toggleConsole) {
-                    this.#logger.toggleConsole();
+            // Character counter
+            input?.on('input', () => {
+                const count = input.value().length;
+                this.jex.$('charCount')?.text(`${count} characters`);
+
+                // Enable/disable button
+                if (count > 0) {
+                    addBtn?.cls('-opacity-50').props('disabled', false);
+                } else {
+                    addBtn?.cls('+opacity-50').props('disabled', true);
+                }
+            });
+
+            // Add note
+            addBtn?.onClick(() => this.#handleAddNote());
+
+            // Ctrl+Enter to save
+            input?.on('keydown', (e) => {
+                if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                    e.preventDefault();
+                    this.#handleAddNote();
                 }
             });
         }
 
-        addBox() {
-            this.boxCount++;
-            const colors = ['blue', 'green', 'purple', 'red', 'yellow', 'pink'];
-            const color = colors[Math.floor(Math.random() * colors.length)];
+        #handleAddNote() {
+            const input = this.jex.$('noteInput');
+            const text = input.value().trim();
 
-            const demoArea = this.#jex.$('demoArea');
-
-            // Clear placeholder text on first box
-            if (this.boxCount === 1) {
-                demoArea.clear();
+            if (text) {
+                this.addNote(text);
+                input.value('');
+                this.jex.$('charCount')?.text('0 characters');
+                this.jex.$('addNote')?.cls('+opacity-50').props('disabled', true);
             }
+        }
 
-            const box = this.#jex.create('div')
-                .cls(`w-16 h-16 bg-${color}-500 rounded-lg m-2 flex items-center justify-center text-white font-bold cursor-pointer transform transition-all hover:scale-110 opacity-0`)
-                .text(this.boxCount)
-                .onClick(() => {
-                    box.cls('+animate-bounce');
-                    setTimeout(() => box.cls('-animate-bounce'), 1000);
+        addNote(text) {
+            const note = {
+                id: this.#noteCounter++,
+                text: text,
+                createdAt: new Date().toISOString()
+            };
+
+            this.#notes.unshift(note);
+            this.#saveNotes();
+            this.#render();
+        }
+
+        deleteNote(noteId) {
+            this.#notes = this.#notes.filter(n => n.id !== noteId);
+            this.#saveNotes();
+            this.#render();
+        }
+
+        #render() {
+            const notesList = this.jex.$('notesList');
+            const emptyState = this.jex.$('emptyState');
+
+            notesList.clear();
+
+            if (this.#notes.length === 0) {
+                emptyState.show();
+            } else {
+                emptyState.hide();
+                this.#notes.forEach(note => {
+                    const noteEl = this.#createNoteElement(note);
+                    notesList.append(noteEl);
                 });
-
-            demoArea.append(box);
-
-            // Fade in
-            setTimeout(() => box.cls('+opacity-100'), 10);
-        }
-
-        showToast() {
-            if (this.#toast) {
-                this.#toast.success('Hello from Jex! 👋');
-            } else {
-                alert('Toast system not available');
             }
         }
 
-        logMessage() {
-            const message = `Demo message #${Date.now()}`;
+        #createNoteElement(note) {
+            const timeAgo = this.#getTimeAgo(note.createdAt);
 
-            if (this.#logger) {
-                this.#logger.info(message, { boxCount: this.boxCount });
-            } else {
-                console.log(message);
-            }
+            const noteEl = this.jex.create('div')
+                .cls('bg-dark-800 rounded-2xl p-6 border border-dark-700 hover:border-dark-600 transition-all duration-200 group')
+                .attr('data-note-id', note.id);
+
+            // Note text
+            noteEl.add('p')
+                .cls('text-gray-100 leading-relaxed mb-4 whitespace-pre-wrap')
+                .text(note.text);
+
+            // Footer
+            const footer = noteEl.add('div')
+                .cls('flex justify-between items-center text-xs');
+
+            footer.add('span')
+                .cls('text-gray-500')
+                .text(timeAgo);
+
+            footer.add('button')
+                .cls('text-gray-600 hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100 p-1')
+                .html('<i data-lucide="trash-2" class="w-4 h-4"></i>')
+                .onClick(() => this.deleteNote(note.id));
+
+            return noteEl;
         }
 
-        clearAll() {
-            const demoArea = this.#jex.$('demoArea');
-            demoArea.clear().html('Click buttons above to see Jex in action!').cls('+text-gray-500 +flex +items-center +justify-center');
-            this.boxCount = 0;
+        #getTimeAgo(dateString) {
+            const now = new Date();
+            const date = new Date(dateString);
+            const diffMs = now - date;
+            const diffMins = Math.floor(diffMs / 60000);
+            const diffHours = Math.floor(diffMs / 3600000);
+            const diffDays = Math.floor(diffMs / 86400000);
 
-            if (this.#toast) {
-                this.#toast.info('Demo cleared!');
+            if (diffMins < 1) return 'Just now';
+            if (diffMins < 60) return `${diffMins}m ago`;
+            if (diffHours < 24) return `${diffHours}h ago`;
+            if (diffDays < 7) return `${diffDays}d ago`;
+            return date.toLocaleDateString();
+        }
+
+        #saveNotes() {
+            localStorage.setItem('jex-notes', JSON.stringify(this.#notes));
+        }
+
+        #loadNotes() {
+            try {
+                const saved = localStorage.getItem('jex-notes');
+                if (saved) {
+                    this.#notes = JSON.parse(saved);
+                    const maxId = Math.max(0, ...this.#notes.map(n => n.id));
+                    this.#noteCounter = maxId + 1;
+                }
+            } catch (error) {
+                this.#notes = [];
             }
         }
     }
 
-    // Start the demo
-    const demo = new SimpleJexDemo();
-    demo.init();
+    // Launch app
+    await NotesApp.launch(NotesApp);
+    lucide.createIcons();
 </script>
+
 </body>
 </html>
