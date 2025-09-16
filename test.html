@@ -3,324 +3,140 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jex Framework Import Test</title>
+    <title>Jex Test Terminal</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Consolas', 'Monaco', monospace;
+            background: #0a0a0a;
+            color: #00ff41;
+            height: 100vh;
+            overflow: hidden;
+        }
 
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
+        .header {
+            background: #1a1a1a;
+            padding: 15px 20px;
+            border-bottom: 1px solid #333;
+        }
 
-    <!-- Lucide Icons -->
-    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+        .title {
+            color: #00ff41;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        #terminal {
+            height: calc(100vh - 60px);
+            padding: 20px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            line-height: 1.3;
+            font-size: 13px;
+        }
+
+        .error { color: #ff4757; }
+        .success { color: #2ed573; }
+        .info { color: #70a1ff; }
+        .warn { color: #ffa502; }
+        .dim { color: #666; }
+        .prompt { color: #00ff41; font-weight: bold; }
+    </style>
 </head>
-<body class="bg-gray-100 min-h-screen p-8">
-
-<!-- Header -->
-<div class="max-w-4xl mx-auto mb-8">
-    <div class="bg-white rounded-xl shadow-sm border p-6">
-        <div class="flex items-center gap-3 mb-4">
-            <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-                <span class="text-white font-bold">J</span>
-            </div>
-            <div>
-                <h1 class="text-2xl font-bold text-gray-900">Jex Framework Import Test</h1>
-                <p class="text-gray-500">Testing ES6 module imports and MIME types</p>
-            </div>
-        </div>
-
-        <div id="overallStatus" class="p-4 rounded-lg bg-gray-50 text-gray-600">
-            🔄 Initializing tests...
-        </div>
-    </div>
+<body>
+<div class="header">
+    <div class="title">JEX FRAMEWORK TEST</div>
 </div>
 
-<!-- Test Results -->
-<div class="max-w-4xl mx-auto space-y-4">
-    <!-- Individual File Tests -->
-    <div class="bg-white rounded-xl shadow-sm border overflow-hidden">
-        <div class="bg-gray-50 px-6 py-3 border-b">
-            <h2 class="font-semibold text-gray-900 flex items-center gap-2">
-                <i data-lucide="file-text" class="w-5 h-5"></i>
-                Individual File Import Tests
-            </h2>
-        </div>
-        <div id="fileTests" class="p-6">
-            <!-- Test results will be inserted here -->
-        </div>
-    </div>
+<div id="terminal">=== STARTING TESTS ===
 
-    <!-- Package Test -->
-    <div class="bg-white rounded-xl shadow-sm border overflow-hidden">
-        <div class="bg-gray-50 px-6 py-3 border-b">
-            <h2 class="font-semibold text-gray-900 flex items-center gap-2">
-                <i data-lucide="package" class="w-5 h-5"></i>
-                JexPackage Integration Test
-            </h2>
-        </div>
-        <div id="packageTest" class="p-6">
-            <div class="text-gray-500">Waiting for individual tests to complete...</div>
-        </div>
-    </div>
-
-    <!-- Functionality Test -->
-    <div class="bg-white rounded-xl shadow-sm border overflow-hidden">
-        <div class="bg-gray-50 px-6 py-3 border-b">
-            <h2 class="font-semibold text-gray-900 flex items-center gap-2">
-                <i data-lucide="play-circle" class="w-5 h-5"></i>
-                Functionality Test
-            </h2>
-        </div>
-        <div id="functionalityTest" class="p-6">
-            <div class="text-gray-500">Waiting for imports to complete...</div>
-        </div>
-    </div>
-
-    <!-- Debug Info -->
-    <div class="bg-white rounded-xl shadow-sm border overflow-hidden">
-        <div class="bg-gray-50 px-6 py-3 border-b">
-            <h2 class="font-semibold text-gray-900 flex items-center gap-2">
-                <i data-lucide="bug" class="w-5 h-5"></i>
-                Debug Information
-            </h2>
-        </div>
-        <div id="debugInfo" class="p-6 font-mono text-sm">
-            <!-- Debug info will be inserted here -->
-        </div>
-    </div>
 </div>
 
 <script type="module">
-    // Test state
-    let testResults = {
-        files: {},
-        package: null,
-        functionality: null,
-        totalTests: 0,
-        passedTests: 0
-    };
+    const CDN_BASE = 'https://cdn.jsdelivr.net/gh/Bloechle/jex@latest';
+    const terminal = document.getElementById('terminal');
 
-    // DOM elements
-    const overallStatus = document.getElementById('overallStatus');
-    const fileTests = document.getElementById('fileTests');
-    const packageTest = document.getElementById('packageTest');
-    const functionalityTest = document.getElementById('functionalityTest');
-    const debugInfo = document.getElementById('debugInfo');
+    function log(text, type = '') {
+        const time = new Date().toLocaleTimeString();
+        const line = `[${time}] ${text}\n`;
 
-    // Initialize Lucide icons
-    lucide.createIcons();
-
-    // Helper functions
-    function updateOverallStatus() {
-        const percentage = testResults.totalTests > 0 ? Math.round((testResults.passedTests / testResults.totalTests) * 100) : 0;
-
-        if (testResults.totalTests === 0) {
-            overallStatus.innerHTML = '🔄 Running tests...';
-            overallStatus.className = 'p-4 rounded-lg bg-blue-50 text-blue-700';
-        } else if (testResults.passedTests === testResults.totalTests) {
-            overallStatus.innerHTML = `✅ All tests passed! (${testResults.passedTests}/${testResults.totalTests})`;
-            overallStatus.className = 'p-4 rounded-lg bg-green-50 text-green-700';
-        } else {
-            overallStatus.innerHTML = `⚠️ ${testResults.passedTests}/${testResults.totalTests} tests passed (${percentage}%)`;
-            overallStatus.className = 'p-4 rounded-lg bg-yellow-50 text-yellow-700';
-        }
+        const span = document.createElement('span');
+        span.className = type;
+        span.textContent = line;
+        terminal.appendChild(span);
+        terminal.scrollTop = terminal.scrollHeight;
     }
 
-    function logDebug(message) {
-        console.log(message);
-        const timestamp = new Date().toLocaleTimeString();
-        debugInfo.innerHTML += `<div class="text-gray-600 mb-1">[${timestamp}] ${message}</div>`;
+    function separator(title = '') {
+        const line = title ? `=== ${title} ===\n` : '========================\n';
+        const span = document.createElement('span');
+        span.className = 'dim';
+        span.textContent = line;
+        terminal.appendChild(span);
     }
 
-    function createTestResult(name, status, error = null) {
-        const statusClass = status === 'success' ? 'bg-green-50 text-green-700 border-green-200' :
-            status === 'error' ? 'bg-red-50 text-red-700 border-red-200' :
-                'bg-yellow-50 text-yellow-700 border-yellow-200';
-
-        const icon = status === 'success' ? 'check-circle' :
-            status === 'error' ? 'x-circle' : 'clock';
-
-        return `
-                <div class="flex items-start gap-3 p-4 border rounded-lg ${statusClass} mb-3">
-                    <i data-lucide="${icon}" class="w-5 h-5 mt-0.5 flex-shrink-0"></i>
-                    <div class="flex-1">
-                        <div class="font-medium">${name}</div>
-                        ${error ? `<div class="text-sm mt-1 font-mono bg-white/50 p-2 rounded">${error}</div>` : ''}
-                    </div>
-                </div>
-            `;
-    }
-
-    // Test individual file imports
-    async function testFileImport(filename, displayName) {
-        logDebug(`Testing import: ${filename}`);
-        testResults.totalTests++;
-
+    async function test(file, desc) {
+        log(`Testing ${desc}...`, 'info');
         try {
-            const startTime = performance.now();
-            const module = await import(`./${filename}`);
-            const loadTime = Math.round(performance.now() - startTime);
-
-            testResults.files[filename] = { status: 'success', module, loadTime };
-            testResults.passedTests++;
-
-            logDebug(`✅ ${filename} loaded successfully (${loadTime}ms)`);
-
-            return createTestResult(
-                `${displayName} (${loadTime}ms)`,
-                'success'
-            );
-
-        } catch (error) {
-            testResults.files[filename] = { status: 'error', error: error.message };
-
-            logDebug(`❌ ${filename} failed: ${error.message}`);
-
-            return createTestResult(
-                displayName,
-                'error',
-                error.message
-            );
+            const start = performance.now();
+            const module = await import(`${CDN_BASE}/${file}`);
+            const time = Math.round(performance.now() - start);
+            log(`✓ ${file} loaded (${time}ms)`, 'success');
+            return { ok: true, module };
+        } catch (e) {
+            log(`✗ ${file} failed: ${e.message}`, 'error');
+            return { ok: false, error: e.message };
         }
     }
 
-    // Test package integration
-    async function testPackageIntegration() {
-        logDebug('Testing JexPackage integration...');
-        testResults.totalTests++;
+    async function run() {
+        log(`CDN: ${CDN_BASE}`, 'dim');
+        separator();
 
-        try {
-            if (!testResults.files['JexPackage.js'] || testResults.files['JexPackage.js'].status !== 'success') {
-                throw new Error('JexPackage.js failed to load');
-            }
-
-            const jexPackageModule = testResults.files['JexPackage.js'].module;
-            const { default: jexPackage, jex, logger, toast, inspector } = jexPackageModule;
-
-            // Test package initialization
-            if (jexPackage && typeof jexPackage.isReady === 'function') {
-                const isReady = jexPackage.isReady();
-                logDebug(`JexPackage ready status: ${isReady}`);
-
-                testResults.package = { status: 'success', isReady };
-                testResults.passedTests++;
-
-                return createTestResult(
-                    `JexPackage Integration (Ready: ${isReady})`,
-                    'success'
-                );
-            } else {
-                throw new Error('JexPackage does not have expected structure');
-            }
-
-        } catch (error) {
-            testResults.package = { status: 'error', error: error.message };
-            logDebug(`❌ Package integration failed: ${error.message}`);
-
-            return createTestResult(
-                'JexPackage Integration',
-                'error',
-                error.message
-            );
-        }
-    }
-
-    // Test basic functionality
-    async function testFunctionality() {
-        logDebug('Testing basic functionality...');
-        testResults.totalTests++;
-
-        try {
-            if (!testResults.package || testResults.package.status !== 'success') {
-                throw new Error('Package integration must pass first');
-            }
-
-            const jexPackageModule = testResults.files['JexPackage.js'].module;
-            const { default: jexPackage, jex } = jexPackageModule;
-
-            // Test DOM manipulation
-            const testDiv = document.createElement('div');
-            testDiv.id = 'jexTest';
-            testDiv.innerHTML = 'Test Element';
-            document.body.appendChild(testDiv);
-
-            // Test jex functionality
-            if (jex && typeof jex.$ === 'function') {
-                const element = jex.$('jexTest');
-                if (element && typeof element.text === 'function') {
-                    element.text('Modified by Jex');
-
-                    if (testDiv.textContent === 'Modified by Jex') {
-                        logDebug('✅ DOM manipulation working');
-                        testResults.functionality = { status: 'success' };
-                        testResults.passedTests++;
-
-                        // Clean up
-                        testDiv.remove();
-
-                        return createTestResult(
-                            'Basic DOM Manipulation',
-                            'success'
-                        );
-                    }
-                }
-            }
-
-            throw new Error('DOM manipulation test failed');
-
-        } catch (error) {
-            testResults.functionality = { status: 'error', error: error.message };
-            logDebug(`❌ Functionality test failed: ${error.message}`);
-
-            return createTestResult(
-                'Basic Functionality',
-                'error',
-                error.message
-            );
-        }
-    }
-
-    // Run all tests
-    async function runAllTests() {
-        logDebug('🚀 Starting Jex Framework Import Tests');
-
-        // Test individual files
-        const filesToTest = [
-            { file: 'Jex.js', name: 'Jex.js (Core DOM Library)' },
-            { file: 'JexLogger.js', name: 'JexLogger.js (Logging System)' },
-            { file: 'JexToast.js', name: 'JexToast.js (Toast Notifications)' },
-            { file: 'JexInspector.js', name: 'JexInspector.js (DOM Inspector)' },
-            { file: 'JexApp.js', name: 'JexApp.js (Application Framework)' },
-            { file: 'JexPackage.js', name: 'JexPackage.js (Unified Package)' }
+        const tests = [
+            { file: 'Jex.js', desc: 'Core Library' },
+            { file: 'JexLogger.js', desc: 'Logger' },
+            { file: 'JexToast.js', desc: 'Toast' },
+            { file: 'JexInspector.js', desc: 'Inspector' },
+            { file: 'JexApp.js', desc: 'App Framework' },
+            { file: 'JexPackage.js', desc: 'Package' }
         ];
 
-        let fileTestsHTML = '';
-        for (const { file, name } of filesToTest) {
-            const result = await testFileImport(file, name);
-            fileTestsHTML += result;
-            updateOverallStatus();
-            lucide.createIcons(); // Refresh icons
+        let passed = 0;
+        let results = {};
+
+        for (const { file, desc } of tests) {
+            const result = await test(file, desc);
+            results[file] = result;
+            if (result.ok) passed++;
         }
-        fileTests.innerHTML = fileTestsHTML;
 
-        // Test package integration
-        const packageResult = await testPackageIntegration();
-        packageTest.innerHTML = packageResult;
-        updateOverallStatus();
-        lucide.createIcons();
+        separator('RESULTS');
+        const total = tests.length;
+        log(`${passed}/${total} tests passed`, passed === total ? 'success' : 'error');
 
-        // Test functionality
-        const functionalityResult = await testFunctionality();
-        functionalityTest.innerHTML = functionalityResult;
-        updateOverallStatus();
-        lucide.createIcons();
+        if (passed === total) {
+            separator('FUNCTIONALITY');
+            try {
+                const { default: pkg, jex } = results['JexPackage.js'].module;
+                log(`Package v${pkg.version} ready: ${pkg.isReady()}`, 'success');
 
-        logDebug('🏁 All tests completed');
+                // DOM test
+                const div = document.createElement('div');
+                div.id = 'test';
+                document.body.appendChild(div);
+                jex.$('test').text('works');
+                log('✓ DOM manipulation working', 'success');
+                div.remove();
+            } catch (e) {
+                log(`✗ Functionality failed: ${e.message}`, 'error');
+            }
+        }
+
+        separator();
     }
 
-    // Start tests
-    runAllTests().catch(error => {
-        logDebug(`❌ Test runner failed: ${error.message}`);
-        overallStatus.innerHTML = `❌ Test runner failed: ${error.message}`;
-        overallStatus.className = 'p-4 rounded-lg bg-red-50 text-red-700';
-    });
+    run();
 </script>
 </body>
 </html>

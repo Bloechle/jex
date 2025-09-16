@@ -4,486 +4,192 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Jex Framework Demo</title>
-
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-
-    <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
-
-    <!-- Font Awesome for logger icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body class="bg-gray-100 min-h-screen">
+<body class="bg-gray-100 min-h-screen p-8">
 <!-- Header -->
-<header id="mainHeader" class="bg-white shadow-sm border-b">
-    <div class="max-w-4xl mx-auto px-6 py-4">
-        <div class="flex items-center justify-between">
-            <div class="flex items-center gap-3">
-                <div class="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-                    <span class="text-white font-bold text-sm">J</span>
-                </div>
-                <div>
-                    <h1 class="text-xl font-bold text-gray-900">Jex Framework</h1>
-                    <p class="text-sm text-gray-500">Lightweight DOM manipulation with zero dependencies</p>
-                </div>
-            </div>
-            <button id="themeToggle" class="p-2 rounded-lg bg-gray-100 hover:bg-gray-200 transition-colors">
-                <i data-lucide="sun" class="w-5 h-5"></i>
-            </button>
+<div class="max-w-2xl mx-auto text-center mb-12">
+    <div class="w-16 h-16 bg-blue-500 rounded-xl mx-auto mb-4 flex items-center justify-center">
+        <span class="text-white font-bold text-2xl">J</span>
+    </div>
+    <h1 class="text-3xl font-bold text-gray-900">Jex Framework</h1>
+    <p class="text-gray-600 mt-2">Lightweight DOM manipulation with zero dependencies</p>
+</div>
+
+<!-- Demo Buttons -->
+<div class="max-w-2xl mx-auto mb-8">
+    <div class="bg-white rounded-xl p-6 shadow-sm">
+        <h2 class="text-lg font-semibold mb-4">Try It Out</h2>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <button id="addBox" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">Add Box</button>
+            <button id="showToast" class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600">Show Toast</button>
+            <button id="logMessage" class="px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600">Log Message</button>
+            <button id="clearAll" class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600">Clear All</button>
         </div>
     </div>
-</header>
+</div>
 
-<!-- Main Content -->
-<main id="mainContent" class="max-w-4xl mx-auto px-6 py-8">
-    <!-- Demo Controls -->
-    <section class="bg-white rounded-xl shadow-sm border p-6 mb-8">
-        <h2 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-            <i data-lucide="play-circle" class="w-5 h-5 text-blue-500"></i>
-            Interactive Demo
-        </h2>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <!-- Toast Demos -->
-            <div class="space-y-2">
-                <h3 class="text-sm font-medium text-gray-700">Toast Notifications</h3>
-                <button id="toastSuccess" class="w-full px-3 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors text-sm">
-                    Success Toast
-                </button>
-                <button id="toastError" class="w-full px-3 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors text-sm">
-                    Error Toast
-                </button>
-                <button id="toastWarning" class="w-full px-3 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors text-sm">
-                    Warning Toast
-                </button>
-            </div>
-
-            <!-- Logger Demos -->
-            <div class="space-y-2">
-                <h3 class="text-sm font-medium text-gray-700">Console Logger</h3>
-                <button id="logInfo" class="w-full px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-sm">
-                    Log Info
-                </button>
-                <button id="logWarning" class="w-full px-3 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors text-sm">
-                    Log Warning
-                </button>
-                <button id="logError" class="w-full px-3 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors text-sm">
-                    Log Error
-                </button>
-            </div>
-
-            <!-- DOM Manipulation -->
-            <div class="space-y-2">
-                <h3 class="text-sm font-medium text-gray-700">DOM Manipulation</h3>
-                <button id="addElement" class="w-full px-3 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors text-sm">
-                    Add Element
-                </button>
-                <button id="animateElements" class="w-full px-3 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition-colors text-sm">
-                    Animate Elements
-                </button>
-                <button id="clearElements" class="w-full px-3 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors text-sm">
-                    Clear All
-                </button>
-            </div>
-
-            <!-- Inspector & Utils -->
-            <div class="space-y-2">
-                <h3 class="text-sm font-medium text-gray-700">Inspector & Utils</h3>
-                <button id="toggleConsole" class="w-full px-3 py-2 bg-teal-500 text-white rounded-lg hover:bg-teal-600 transition-colors text-sm">
-                    Toggle Console (F2)
-                </button>
-                <button id="createModal" class="w-full px-3 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors text-sm">
-                    Create Modal
-                </button>
-                <div class="text-xs text-gray-500 mt-2">
-                    Hover elements to inspect (when console is open)
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Dynamic Content Area -->
-    <section class="bg-white rounded-xl shadow-sm border p-6">
-        <h2 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-            <i data-lucide="layers" class="w-5 h-5 text-purple-500"></i>
-            Dynamic Content
-        </h2>
-        <div id="dynamicContent" class="min-h-[200px] border-2 border-dashed border-gray-200 rounded-lg p-4 flex items-center justify-center text-gray-500">
-            Click the buttons above to see Jex in action!
-        </div>
-    </section>
-
-    <!-- Features Overview -->
-    <section class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div class="bg-white rounded-xl shadow-sm border p-6">
-            <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
-                <i data-lucide="zap" class="w-6 h-6 text-blue-600"></i>
-            </div>
-            <h3 class="font-semibold text-gray-900 mb-2">Zero Dependencies</h3>
-            <p class="text-gray-600 text-sm">Pure JavaScript with no external requirements. Lightweight and fast.</p>
-        </div>
-
-        <div class="bg-white rounded-xl shadow-sm border p-6">
-            <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
-                <i data-lucide="code" class="w-6 h-6 text-green-600"></i>
-            </div>
-            <h3 class="font-semibold text-gray-900 mb-2">jQuery-like Syntax</h3>
-            <p class="text-gray-600 text-sm">Familiar API with method chaining for cleaner, more readable code.</p>
-        </div>
-
-        <div class="bg-white rounded-xl shadow-sm border p-6">
-            <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
-                <i data-lucide="tool" class="w-6 h-6 text-purple-600"></i>
-            </div>
-            <h3 class="font-semibold text-gray-900 mb-2">Rich Ecosystem</h3>
-            <p class="text-gray-600 text-sm">Complete toolkit with logger, inspector, toasts, and more components.</p>
-        </div>
-    </section>
-</main>
+<!-- Demo Area -->
+<div class="max-w-2xl mx-auto">
+    <div id="demoArea" class="bg-white rounded-xl p-8 shadow-sm min-h-[200px] flex items-center justify-center text-gray-500">
+        Click buttons above to see Jex in action!
+    </div>
+</div>
 
 <!-- Footer -->
-<footer class="mt-16 py-8 border-t bg-white">
-    <div class="max-w-4xl mx-auto px-6 text-center">
-        <p class="text-gray-600 text-sm">
-            Press <kbd class="px-2 py-1 bg-gray-100 rounded text-xs">F2</kbd> to toggle the debug console and hover over elements to inspect them.
-        </p>
-        <div class="mt-2 flex items-center justify-center gap-4 text-xs text-gray-500">
-            <span>Jex Framework v2025.07.02</span>
-            <span>•</span>
-            <a href="https://github.com/Bloechle/jex" class="hover:text-blue-600 transition-colors">GitHub</a>
-            <span>•</span>
-            <span>MIT License</span>
-        </div>
-    </div>
-</footer>
+<div class="max-w-2xl mx-auto text-center mt-8 text-sm text-gray-500">
+    Press <kbd class="px-2 py-1 bg-white rounded border">F2</kbd> for console
+</div>
 
-<!-- JavaScript -->
 <script type="module">
     /**
-     * JexPackageDemoApp.js - Demo application showcasing Jex Package capabilities
+     * SimpleJexDemo.js - Clean and simple Jex Framework demonstration
      *
      * CLASS STRUCTURE:
      * ---------------
      * Public Fields:
-     *   - elementCounter {number}: Counter for dynamically created elements
+     *   - boxCount {number}: Counter for created boxes
      *
      * Private Fields:
-     *   - #package {JexPackage}: Main package instance
-     *   - #jex {Jex}: Jex instance for DOM manipulation
-     *   - #logger {JexLogger}: Logger instance for debugging
-     *   - #toast {JexToast}: Toast instance for notifications
+     *   - #jex {Jex}: Core Jex instance
+     *   - #logger {JexLogger|null}: Logger instance if available
+     *   - #toast {JexToast|null}: Toast instance if available
      *
      * Public Methods:
-     *   - onInit(): void - Initialize demo components and event handlers
-     *   - onReady(): void - Called when app is fully ready
-     *   - createModal(title: string, message: string): void - Create modal dialog
-     *   - addDynamicElement(): void - Add new element to dynamic content area
-     *   - animateElements(): void - Animate existing elements
-     *   - clearDynamicContent(): void - Clear all dynamic elements
+     *   - init(): Promise<void> - Initialize the demo
+     *   - addBox(): void - Add a colored box to demo area
+     *   - showToast(): void - Display a toast notification
+     *   - logMessage(): void - Log a demo message
+     *   - clearAll(): void - Clear the demo area
      *
      * Dependencies:
-     *   - JexPackage: Unified package for complete Jex ecosystem
+     *   - Jex.js: Core DOM manipulation library
+     *   - JexLogger.js: Logging system (optional)
+     *   - JexToast.js: Toast notifications (optional)
      *
      * Relations:
-     *   - Extends: JexApp base class
-     *   - Uses: Complete Jex ecosystem via JexPackage
+     *   - Demonstrates: Basic Jex Framework capabilities
+     *   - Uses: Minimal subset of framework features
      *
-     * Last Modified: 2025-01-16 - Updated to use JexPackage with raw GitHub imports
+     * Last Modified: 2025-01-16 - Simplified elegant demo
      */
 
-    // Import unified Jex Package
-    // With this:
-    import jexPackage, { JexApp } from 'https://raw.githubusercontent.com/Bloechle/jex/main/JexPackage.js';
-
-    class JexPackageDemoApp extends JexApp {
+    class SimpleJexDemo {
         // Public fields
-        elementCounter = 0;
+        boxCount = 0;
 
         // Private fields
-        #package = jexPackage;
         #jex = null;
         #logger = null;
         #toast = null;
 
-        constructor() {
-            super({
-                name: 'Jex Package Demo',
-                version: '2025.07.02',
-                enableHeader: true,
-                headerSelector: '#mainHeader',
-                headerAutoHide: false,
-                enableKeyboardShortcuts: true,
-                initialState: {
-                    elementsCreated: 0,
-                    demoMode: 'interactive'
+        async init() {
+            // Load Jex core (required)
+            try {
+                const { jex } = await import('https://cdn.jsdelivr.net/gh/Bloechle/jex@latest/Jex.js');
+                this.#jex = jex;
+                console.log('✅ Jex loaded');
+            } catch (error) {
+                console.error('❌ Jex failed to load:', error);
+                return;
+            }
+
+            // Load optional components
+            try {
+                const { logger } = await import('https://cdn.jsdelivr.net/gh/Bloechle/jex@latest/JexLogger.js');
+                this.#logger = logger;
+                console.log('✅ Logger loaded');
+            } catch (error) {
+                console.log('ℹ️ Logger not available');
+            }
+
+            try {
+                const { toast } = await import('https://cdn.jsdelivr.net/gh/Bloechle/jex@latest/JexToast.js');
+                this.#toast = toast;
+                this.#toast.mount();
+                console.log('✅ Toast loaded');
+            } catch (error) {
+                console.log('ℹ️ Toast not available');
+            }
+
+            this.#setupEvents();
+            lucide.createIcons();
+        }
+
+        #setupEvents() {
+            this.#jex.$('addBox')?.onClick(() => this.addBox());
+            this.#jex.$('showToast')?.onClick(() => this.showToast());
+            this.#jex.$('logMessage')?.onClick(() => this.logMessage());
+            this.#jex.$('clearAll')?.onClick(() => this.clearAll());
+
+            // F2 for console
+            this.#jex.onKey('F2', (e) => {
+                e.preventDefault();
+                if (this.#logger?.toggleConsole) {
+                    this.#logger.toggleConsole();
                 }
             });
-
-            // Setup package component references
-            this.#jex = this.#package.jex;
-            this.#logger = this.#package.logger;
-            this.#toast = this.#package.toast;
         }
 
-        async onInit() {
-            // Wait for package to be ready
-            if (!this.#package.isReady()) {
-                await this.#package.init();
+        addBox() {
+            this.boxCount++;
+            const colors = ['blue', 'green', 'purple', 'red', 'yellow', 'pink'];
+            const color = colors[Math.floor(Math.random() * colors.length)];
+
+            const demoArea = this.#jex.$('demoArea');
+
+            // Clear placeholder text on first box
+            if (this.boxCount === 1) {
+                demoArea.clear();
             }
 
-            // Initialize Lucide icons
-            lucide.createIcons();
-
-            // Setup DOM references
-            this.dom.dynamicContent = this.#jex.$('dynamicContent');
-            this.dom.themeToggle = this.#jex.$('themeToggle');
-
-            // Initialize event handlers
-            this.#setupToastHandlers();
-            this.#setupLoggerHandlers();
-            this.#setupDOMHandlers();
-            this.#setupUtilityHandlers();
-            this.#setupGlobalKeyboardShortcuts();
-
-            this.#logger.info('Jex Package Demo initialized successfully!');
-        }
-
-        onReady() {
-            this.#toast.success('Jex Package demo is ready! Try the buttons above.');
-            this.#logger.info('All event handlers initialized');
-            this.#logger.info('Package components:', Object.keys(this.#package.components));
-        }
-
-        #setupToastHandlers() {
-            this.#jex.$('toastSuccess').onClick(() => {
-                this.#toast.success('Operation completed successfully!');
-            });
-
-            this.#jex.$('toastError').onClick(() => {
-                this.#toast.error('Something went wrong. Please try again.');
-            });
-
-            this.#jex.$('toastWarning').onClick(() => {
-                this.#toast.warning('This action cannot be undone.');
-            });
-        }
-
-        #setupLoggerHandlers() {
-            this.#jex.$('logInfo').onClick(() => {
-                this.#logger.info('This is an info message with some data:', {
-                    timestamp: Date.now(),
-                    user: 'demo',
-                    package: this.#package.version,
-                    state: this.state
+            const box = this.#jex.create('div')
+                .cls(`w-16 h-16 bg-${color}-500 rounded-lg m-2 flex items-center justify-center text-white font-bold cursor-pointer transform transition-all hover:scale-110 opacity-0`)
+                .text(this.boxCount)
+                .onClick(() => {
+                    box.cls('+animate-bounce');
+                    setTimeout(() => box.cls('-animate-bounce'), 1000);
                 });
-            });
 
-            this.#jex.$('logWarning').onClick(() => {
-                this.#logger.warn('Warning: This is a warning message');
-            });
+            demoArea.append(box);
 
-            this.#jex.$('logError').onClick(() => {
-                this.#logger.error('Error: Something went wrong!', new Error('Demo error'));
-            });
+            // Fade in
+            setTimeout(() => box.cls('+opacity-100'), 10);
         }
 
-        #setupDOMHandlers() {
-            this.#jex.$('addElement').onClick(() => {
-                this.addDynamicElement();
-            });
-
-            this.#jex.$('animateElements').onClick(() => {
-                this.animateElements();
-            });
-
-            this.#jex.$('clearElements').onClick(() => {
-                this.clearDynamicContent();
-            });
-        }
-
-        #setupUtilityHandlers() {
-            this.#jex.$('toggleConsole').onClick(() => {
-                this.#logger.toggleConsole();
-            });
-
-            this.#jex.$('createModal').onClick(() => {
-                this.createModal(
-                    'Jex Package Demo',
-                    'This modal was created using the unified JexPackage! All components are loaded from a single import with raw GitHub links.'
-                );
-            });
-
-            this.dom.themeToggle.onClick(() => {
-                this.#toast.info('Theme toggle coming soon!');
-            });
-        }
-
-        #setupGlobalKeyboardShortcuts() {
-            // ESC to close modals
-            this.#jex.onKey('Escape', () => {
-                this.#jex.find('[class*="fixed"][class*="inset-0"]').forEach(modal => {
-                    if (modal.ref.style.zIndex >= 50) {
-                        modal.remove();
-                        this.#logger.debug('Modal closed via ESC key');
-                    }
-                });
-            });
-
-            // Ctrl+Shift+D for debug info
-            this.#jex.onKey('Ctrl+Shift+D', () => {
-                this.#logger.info('JexPackage Debug Info:', {
-                    package: {
-                        version: this.#package.version,
-                        initialized: this.#package.isReady(),
-                        components: Object.keys(this.#package.components)
-                    },
-                    app: {
-                        config: this.config,
-                        state: this.state,
-                        elementCounter: this.elementCounter,
-                        initialized: this.initialized
-                    }
-                });
-            });
-        }
-
-        addDynamicElement() {
-            this.elementCounter++;
-
-            // Clear placeholder text if it's the first element
-            if (this.elementCounter === 1) {
-                this.dom.dynamicContent.clear();
+        showToast() {
+            if (this.#toast) {
+                this.#toast.success('Hello from Jex! 👋');
+            } else {
+                alert('Toast system not available');
             }
-
-            const newElement = this.#jex.create('div')
-                .cls('bg-gradient-to-r from-blue-500 to-purple-600 text-white p-4 rounded-lg mb-3 shadow-md transform transition-all hover:scale-105')
-                .html(`
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <h4 class="font-semibold">Element #${this.elementCounter}</h4>
-                            <p class="text-sm opacity-90">Created at ${new Date().toLocaleTimeString()}</p>
-                            <p class="text-xs opacity-75">Via JexPackage v${this.#package.version}</p>
-                        </div>
-                        <button class="remove-btn p-2 hover:bg-white/20 rounded-lg transition-colors">
-                            <i data-lucide="x" class="w-4 h-4"></i>
-                        </button>
-                    </div>
-                `);
-
-            this.dom.dynamicContent.append(newElement);
-
-            // Add remove handler
-            newElement.select('.remove-btn').onClick(() => {
-                newElement.style({ transform: 'scale(0)', opacity: '0' });
-                setTimeout(() => newElement.remove(), 300);
-            });
-
-            // Re-initialize Lucide icons
-            lucide.createIcons();
-
-            // Update application state
-            this.setState({ elementsCreated: this.elementCounter });
-
-            this.#logger.debug(`Added element #${this.elementCounter}`);
         }
 
-        animateElements() {
-            this.#jex.find('#dynamicContent > div').forEach((el, index) => {
-                setTimeout(() => {
-                    el.cls('+animate-pulse');
-                    setTimeout(() => el.cls('-animate-pulse'), 1000);
-                }, index * 100);
-            });
+        logMessage() {
+            const message = `Demo message #${Date.now()}`;
 
-            this.#toast.info('Animating all elements!');
-            this.#logger.debug('Animation sequence started');
+            if (this.#logger) {
+                this.#logger.info(message, { boxCount: this.boxCount });
+            } else {
+                console.log(message);
+            }
         }
 
-        clearDynamicContent() {
-            this.dom.dynamicContent
-                .clear()
-                .html('<div class="text-gray-500 text-center py-8">All elements cleared!</div>');
+        clearAll() {
+            const demoArea = this.#jex.$('demoArea');
+            demoArea.clear().html('Click buttons above to see Jex in action!').cls('+text-gray-500 +flex +items-center +justify-center');
+            this.boxCount = 0;
 
-            this.elementCounter = 0;
-            this.setState({ elementsCreated: 0 });
-
-            this.#logger.info('Cleared all dynamic elements');
-            this.#toast.info('Dynamic content cleared');
-        }
-
-        createModal(title, message) {
-            const modal = this.#jex.create('div')
-                .cls('fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4')
-                .append(
-                    this.#jex.create('div')
-                        .cls('bg-white rounded-xl max-w-md w-full shadow-2xl transform transition-all scale-95')
-                        .append(
-                            this.#jex.create('div')
-                                .cls('p-6 border-b')
-                                .append(
-                                    this.#jex.create('div')
-                                        .cls('flex items-center justify-between')
-                                        .append(
-                                            this.#jex.create('h2')
-                                                .cls('text-xl font-bold text-gray-900')
-                                                .text(title),
-                                            this.#jex.create('button')
-                                                .cls('p-2 hover:bg-gray-100 rounded-lg transition-colors')
-                                                .html('<i data-lucide="x" class="w-5 h-5"></i>')
-                                                .onClick(() => this.#closeModal(modal))
-                                        )
-                                ),
-                            this.#jex.create('div')
-                                .cls('p-6')
-                                .append(
-                                    this.#jex.create('p')
-                                        .cls('text-gray-600 leading-relaxed mb-6')
-                                        .text(message),
-                                    this.#jex.create('div')
-                                        .cls('flex gap-3 justify-end')
-                                        .append(
-                                            this.#jex.create('button')
-                                                .cls('px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors')
-                                                .text('Cancel')
-                                                .onClick(() => this.#closeModal(modal)),
-                                            this.#jex.create('button')
-                                                .cls('px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors')
-                                                .text('Confirm')
-                                                .onClick(() => {
-                                                    this.#toast.success('Modal action confirmed!');
-                                                    this.#closeModal(modal);
-                                                })
-                                        )
-                                )
-                        )
-                )
-                .onClick((e) => {
-                    if (e.target === modal.ref) this.#closeModal(modal);
-                })
-                .mountToBody();
-
-            // Animate in
-            setTimeout(() => {
-                modal.select('div').style({ transform: 'scale(1)' });
-            }, 10);
-
-            // Re-initialize Lucide icons
-            lucide.createIcons();
-
-            this.#logger.debug('Modal created:', title);
-        }
-
-        #closeModal(modal) {
-            modal.style({ opacity: '0' });
-            modal.select('div').style({ transform: 'scale(0.95)' });
-            setTimeout(() => modal.remove(), 200);
-            this.#logger.debug('Modal closed');
+            if (this.#toast) {
+                this.#toast.info('Demo cleared!');
+            }
         }
     }
 
-    // Launch the application using JexPackage
-    jexPackage.createApp(JexPackageDemoApp);
+    // Start the demo
+    const demo = new SimpleJexDemo();
+    demo.init();
 </script>
 </body>
 </html>

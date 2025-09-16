@@ -202,6 +202,7 @@ export class JexToast {
             )
             .attr('aria-live', 'polite')
             .attr('aria-label', 'Notifications');
+        this.mount();
     }
 
     #getPositionClasses() {
