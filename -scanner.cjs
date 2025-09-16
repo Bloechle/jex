@@ -51,7 +51,7 @@ class Scanner {
         const defaultConfig = {
             rootDir: path.resolve(__dirname, folderName),
             outputFile: path.join(__dirname, `-${this.#projectName}.txt`),
-            ignoredPaths: ['LICENCE', '-scanner.js', `-${this.#projectName}.txt`, 'node_modules', '.git', 'dist', 'build', '.idea'],
+            ignoredPaths: ['LICENCE', '-scanner.cjs', `-${this.#projectName}.txt`, 'node_modules', '.git', 'dist', 'build', '.idea'],
             acceptedExtensions: ['.js', '.css', '.html', '.jsx', '.ts', '.tsx', '.json', '.md'],
             encoding: 'utf8',
             maxFileSize: 10 * 1024 * 1024, // 10MB limit per file
@@ -196,7 +196,7 @@ class Scanner {
 
         // Check if file is a documentation file with the dynamic name
         const isDocFile = filename === `-${this.#projectName}.txt` ||
-            filename === '-scanner.js';
+            filename === '-scanner.cjs';
 
         // Check file size
         try {
@@ -230,7 +230,7 @@ class Scanner {
                 const relativePath = path.relative(rootDir, filePath).replace(/\\/g, '/');
 
                 // Skip documentation files with the dynamic name
-                if (file === '-scanner.js' || file === `-${this.#projectName}.txt`) {
+                if (file === '-scanner.cjs' || file === `-${this.#projectName}.txt`) {
                     continue;
                 }
 
@@ -345,7 +345,7 @@ class Scanner {
                         const stat = await fs.stat(filePath);
 
                         // Skip scanner js and documentation file with dynamic name
-                        if (file === '-scanner.js' || file === `-${this.#projectName}.txt`) {
+                        if (file === '-scanner.cjs' || file === `-${this.#projectName}.txt`) {
                             continue;
                         }
 

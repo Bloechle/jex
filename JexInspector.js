@@ -34,8 +34,8 @@
  * Last Modified: 2025-01-13 - Fixed highlighting issues and updated IDs
  */
 
-import { jex } from './Jex.js';
-import { logger } from './JexLogger.js';
+import { jex } from 'https://raw.githubusercontent.com/Bloechle/jex/main/Jex.js';
+import { logger } from 'https://raw.githubusercontent.com/Bloechle/jex/main/JexLogger.js';
 
 // Version constant
 export const INSPECTOR_VERSION = '2025.01.13';

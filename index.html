@@ -16,7 +16,7 @@
 </head>
 <body class="bg-gray-100 min-h-screen">
 <!-- Header -->
-<header class="bg-white shadow-sm border-b">
+<header id="mainHeader" class="bg-white shadow-sm border-b">
     <div class="max-w-4xl mx-auto px-6 py-4">
         <div class="flex items-center justify-between">
             <div class="flex items-center gap-3">
@@ -36,7 +36,7 @@
 </header>
 
 <!-- Main Content -->
-<main class="max-w-4xl mx-auto px-6 py-8">
+<main id="mainContent" class="max-w-4xl mx-auto px-6 py-8">
     <!-- Demo Controls -->
     <section class="bg-white rounded-xl shadow-sm border p-6 mb-8">
         <h2 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
@@ -160,66 +160,194 @@
 
 <!-- JavaScript -->
 <script type="module">
-    // Import Jex ecosystem from CDN
+    /**
+     * JexFrameworkDemoApp.js - Demo application showcasing Jex Framework capabilities
+     *
+     * CLASS STRUCTURE:
+     * ---------------
+     * Public Fields:
+     *   - elementCounter {number}: Counter for dynamically created elements
+     *
+     * Private Fields:
+     *   - #jex {Jex}: Jex instance for DOM manipulation
+     *   - #logger {JexLogger}: Logger instance for debugging
+     *   - #toast {JexToast}: Toast instance for notifications
+     *
+     * Public Methods:
+     *   - onInit(): void - Initialize demo components and event handlers
+     *   - onReady(): void - Called when app is fully ready
+     *   - createModal(title: string, message: string): void - Create modal dialog
+     *   - addDynamicElement(): void - Add new element to dynamic content area
+     *   - animateElements(): void - Animate existing elements
+     *   - clearDynamicContent(): void - Clear all dynamic elements
+     *
+     * Dependencies:
+     *   - JexApp: Base application class
+     *   - Jex: DOM manipulation
+     *   - JexLogger: Console logging
+     *   - JexToast: Toast notifications
+     *
+     * Relations:
+     *   - Extends: JexApp base class
+     *   - Uses: Complete Jex ecosystem
+     *
+     * Last Modified: 2025-01-16 - Created JexApp-based demo application
+     */
+
+    // Import Jex ecosystem
     import { jex } from 'https://cdn.jsdelivr.net/gh/Bloechle/jex@latest/Jex.js';
     import { logger } from 'https://cdn.jsdelivr.net/gh/Bloechle/jex@latest/JexLogger.js';
     import { toast } from 'https://cdn.jsdelivr.net/gh/Bloechle/jex@latest/JexToast.js';
+    import { JexApp } from 'https://cdn.jsdelivr.net/gh/Bloechle/jex@latest/JexApp.js';
 
-    // Initialize Lucide icons
-    lucide.createIcons();
+    class JexFrameworkDemoApp extends JexApp {
+        // Public fields
+        elementCounter = 0;
 
-    // Mount toast system
-    toast.mount();
+        // Private fields
+        #jex = jex;
+        #logger = logger;
+        #toast = toast;
 
-    // Welcome message
-    logger.info('Jex Framework Demo loaded successfully!');
-    toast.info('Welcome to Jex Framework! Try the buttons above.');
-
-    // Toast button handlers
-    jex.$('toastSuccess').onClick(() => {
-        toast.success('Operation completed successfully!');
-    });
-
-    jex.$('toastError').onClick(() => {
-        toast.error('Something went wrong. Please try again.');
-    });
-
-    jex.$('toastWarning').onClick(() => {
-        toast.warning('This action cannot be undone.');
-    });
-
-    // Logger button handlers
-    jex.$('logInfo').onClick(() => {
-        logger.info('This is an info message with some data:', { timestamp: Date.now(), user: 'demo' });
-    });
-
-    jex.$('logWarning').onClick(() => {
-        logger.warn('Warning: This is a warning message');
-    });
-
-    jex.$('logError').onClick(() => {
-        logger.error('Error: Something went wrong!', new Error('Demo error'));
-    });
-
-    // DOM manipulation handlers
-    let elementCounter = 0;
-
-    jex.$('addElement').onClick(() => {
-        elementCounter++;
-        const content = jex.$('dynamicContent');
-
-        // Clear placeholder text if it's the first element
-        if (elementCounter === 1) {
-            content.clear();
+        constructor() {
+            super({
+                name: 'Jex Framework Demo',
+                version: '2025.07.02',
+                enableHeader: true,
+                headerSelector: '#mainHeader',
+                headerAutoHide: false,
+                enableKeyboardShortcuts: true,
+                initialState: {
+                    elementsCreated: 0,
+                    demoMode: 'interactive'
+                }
+            });
         }
 
-        const newElement = jex.create('div')
-            .cls('bg-gradient-to-r from-blue-500 to-purple-600 text-white p-4 rounded-lg mb-3 shadow-md transform transition-all hover:scale-105')
-            .html(`
+        async onInit() {
+            // Initialize Lucide icons
+            lucide.createIcons();
+
+            // Setup DOM references
+            this.dom.dynamicContent = this.#jex.$('dynamicContent');
+            this.dom.themeToggle = this.#jex.$('themeToggle');
+
+            // Initialize event handlers
+            this.#setupToastHandlers();
+            this.#setupLoggerHandlers();
+            this.#setupDOMHandlers();
+            this.#setupUtilityHandlers();
+            this.#setupGlobalKeyboardShortcuts();
+
+            this.#logger.info('Jex Framework Demo initialized successfully!');
+        }
+
+        onReady() {
+            this.#toast.success('Jex Framework demo is ready! Try the buttons above.');
+            this.#logger.info('All event handlers initialized');
+        }
+
+        #setupToastHandlers() {
+            this.#jex.$('toastSuccess').onClick(() => {
+                this.#toast.success('Operation completed successfully!');
+            });
+
+            this.#jex.$('toastError').onClick(() => {
+                this.#toast.error('Something went wrong. Please try again.');
+            });
+
+            this.#jex.$('toastWarning').onClick(() => {
+                this.#toast.warning('This action cannot be undone.');
+            });
+        }
+
+        #setupLoggerHandlers() {
+            this.#jex.$('logInfo').onClick(() => {
+                this.#logger.info('This is an info message with some data:', {
+                    timestamp: Date.now(),
+                    user: 'demo',
+                    state: this.state
+                });
+            });
+
+            this.#jex.$('logWarning').onClick(() => {
+                this.#logger.warn('Warning: This is a warning message');
+            });
+
+            this.#jex.$('logError').onClick(() => {
+                this.#logger.error('Error: Something went wrong!', new Error('Demo error'));
+            });
+        }
+
+        #setupDOMHandlers() {
+            this.#jex.$('addElement').onClick(() => {
+                this.addDynamicElement();
+            });
+
+            this.#jex.$('animateElements').onClick(() => {
+                this.animateElements();
+            });
+
+            this.#jex.$('clearElements').onClick(() => {
+                this.clearDynamicContent();
+            });
+        }
+
+        #setupUtilityHandlers() {
+            this.#jex.$('toggleConsole').onClick(() => {
+                this.#logger.toggleConsole();
+            });
+
+            this.#jex.$('createModal').onClick(() => {
+                this.createModal(
+                    'Jex Modal Demo',
+                    'This modal was created using JexApp! It demonstrates the power of the Jex ecosystem with structured application development.'
+                );
+            });
+
+            this.dom.themeToggle.onClick(() => {
+                this.#toast.info('Theme toggle coming soon!');
+            });
+        }
+
+        #setupGlobalKeyboardShortcuts() {
+            // ESC to close modals
+            this.#jex.onKey('Escape', () => {
+                this.#jex.find('[class*="fixed"][class*="inset-0"]').forEach(modal => {
+                    if (modal.ref.style.zIndex >= 50) {
+                        modal.remove();
+                        this.#logger.debug('Modal closed via ESC key');
+                    }
+                });
+            });
+
+            // Ctrl+Shift+D for debug info
+            this.#jex.onKey('Ctrl+Shift+D', () => {
+                this.#logger.info('JexApp Debug Info:', {
+                    config: this.config,
+                    state: this.state,
+                    elementCounter: this.elementCounter,
+                    initialized: this.initialized
+                });
+            });
+        }
+
+        addDynamicElement() {
+            this.elementCounter++;
+
+            // Clear placeholder text if it's the first element
+            if (this.elementCounter === 1) {
+                this.dom.dynamicContent.clear();
+            }
+
+            const newElement = this.#jex.create('div')
+                .cls('bg-gradient-to-r from-blue-500 to-purple-600 text-white p-4 rounded-lg mb-3 shadow-md transform transition-all hover:scale-105')
+                .html(`
                     <div class="flex items-center justify-between">
                         <div>
-                            <h4 class="font-semibold">Element #${elementCounter}</h4>
+                            <h4 class="font-semibold">Element #${this.elementCounter}</h4>
                             <p class="text-sm opacity-90">Created at ${new Date().toLocaleTimeString()}</p>
+                            <p class="text-xs opacity-75">Via JexApp</p>
                         </div>
                         <button class="remove-btn p-2 hover:bg-white/20 rounded-lg transition-colors">
                             <i data-lucide="x" class="w-4 h-4"></i>
@@ -227,136 +355,119 @@
                     </div>
                 `);
 
-        content.append(newElement);
+            this.dom.dynamicContent.append(newElement);
 
-        // Add remove handler
-        newElement.select('.remove-btn').onClick(() => {
-            newElement.style({ transform: 'scale(0)', opacity: '0' });
-            setTimeout(() => newElement.remove(), 300);
-        });
+            // Add remove handler
+            newElement.select('.remove-btn').onClick(() => {
+                newElement.style({ transform: 'scale(0)', opacity: '0' });
+                setTimeout(() => newElement.remove(), 300);
+            });
 
-        // Re-initialize Lucide icons for new content
-        lucide.createIcons();
+            // Re-initialize Lucide icons
+            lucide.createIcons();
 
-        logger.debug(`Added element #${elementCounter}`);
-    });
+            // Update application state
+            this.setState({ elementsCreated: this.elementCounter });
 
-    jex.$('animateElements').onClick(() => {
-        jex.find('#dynamicContent > div').forEach((el, index) => {
+            this.#logger.debug(`Added element #${this.elementCounter}`);
+        }
+
+        animateElements() {
+            this.#jex.find('#dynamicContent > div').forEach((el, index) => {
+                setTimeout(() => {
+                    el.cls('+animate-pulse');
+                    setTimeout(() => el.cls('-animate-pulse'), 1000);
+                }, index * 100);
+            });
+
+            this.#toast.info('Animating all elements!');
+            this.#logger.debug('Animation sequence started');
+        }
+
+        clearDynamicContent() {
+            this.dom.dynamicContent
+                .clear()
+                .html('<div class="text-gray-500 text-center py-8">All elements cleared!</div>');
+
+            this.elementCounter = 0;
+            this.setState({ elementsCreated: 0 });
+
+            this.#logger.info('Cleared all dynamic elements');
+            this.#toast.info('Dynamic content cleared');
+        }
+
+        createModal(title, message) {
+            const modal = this.#jex.create('div')
+                .cls('fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4')
+                .append(
+                    this.#jex.create('div')
+                        .cls('bg-white rounded-xl max-w-md w-full shadow-2xl transform transition-all scale-95')
+                        .append(
+                            this.#jex.create('div')
+                                .cls('p-6 border-b')
+                                .append(
+                                    this.#jex.create('div')
+                                        .cls('flex items-center justify-between')
+                                        .append(
+                                            this.#jex.create('h2')
+                                                .cls('text-xl font-bold text-gray-900')
+                                                .text(title),
+                                            this.#jex.create('button')
+                                                .cls('p-2 hover:bg-gray-100 rounded-lg transition-colors')
+                                                .html('<i data-lucide="x" class="w-5 h-5"></i>')
+                                                .onClick(() => this.#closeModal(modal))
+                                        )
+                                ),
+                            this.#jex.create('div')
+                                .cls('p-6')
+                                .append(
+                                    this.#jex.create('p')
+                                        .cls('text-gray-600 leading-relaxed mb-6')
+                                        .text(message),
+                                    this.#jex.create('div')
+                                        .cls('flex gap-3 justify-end')
+                                        .append(
+                                            this.#jex.create('button')
+                                                .cls('px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors')
+                                                .text('Cancel')
+                                                .onClick(() => this.#closeModal(modal)),
+                                            this.#jex.create('button')
+                                                .cls('px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors')
+                                                .text('Confirm')
+                                                .onClick(() => {
+                                                    this.#toast.success('Modal action confirmed!');
+                                                    this.#closeModal(modal);
+                                                })
+                                        )
+                                )
+                        )
+                )
+                .onClick((e) => {
+                    if (e.target === modal.ref) this.#closeModal(modal);
+                })
+                .mountToBody();
+
+            // Animate in
             setTimeout(() => {
-                el.cls('+animate-pulse');
-                setTimeout(() => el.cls('-animate-pulse'), 1000);
-            }, index * 100);
-        });
-        toast.info('Animating all elements!');
-    });
+                modal.select('div').style({ transform: 'scale(1)' });
+            }, 10);
 
-    jex.$('clearElements').onClick(() => {
-        jex.$('dynamicContent')
-            .clear()
-            .html('<div class="text-gray-500 text-center py-8">All elements cleared!</div>');
-        elementCounter = 0;
-        logger.info('Cleared all dynamic elements');
-    });
+            // Re-initialize Lucide icons
+            lucide.createIcons();
 
-    // Console toggle handler
-    jex.$('toggleConsole').onClick(() => {
-        logger.toggleConsole();
-    });
+            this.#logger.debug('Modal created:', title);
+        }
 
-    // Modal creation handler
-    jex.$('createModal').onClick(() => {
-        createModal('Jex Modal Demo', 'This modal was created using Jex.js! It demonstrates dynamic element creation, event handling, and DOM manipulation.');
-    });
-
-    // Theme toggle handler
-    jex.$('themeToggle').onClick(() => {
-        document.body.classList.toggle('dark');
-        toast.info('Theme toggle coming soon!');
-    });
-
-    // Modal creation function
-    function createModal(title, message) {
-        const modal = jex.create('div')
-            .cls('fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4')
-            .append(
-                jex.create('div')
-                    .cls('bg-white rounded-xl max-w-md w-full shadow-2xl transform transition-all scale-95')
-                    .append(
-                        jex.create('div')
-                            .cls('p-6 border-b')
-                            .append(
-                                jex.create('div')
-                                    .cls('flex items-center justify-between')
-                                    .append(
-                                        jex.create('h2')
-                                            .cls('text-xl font-bold text-gray-900')
-                                            .text(title),
-                                        jex.create('button')
-                                            .cls('p-2 hover:bg-gray-100 rounded-lg transition-colors')
-                                            .html('<i data-lucide="x" class="w-5 h-5"></i>')
-                                            .onClick(() => closeModal())
-                                    )
-                            ),
-                        jex.create('div')
-                            .cls('p-6')
-                            .append(
-                                jex.create('p')
-                                    .cls('text-gray-600 leading-relaxed mb-6')
-                                    .text(message),
-                                jex.create('div')
-                                    .cls('flex gap-3 justify-end')
-                                    .append(
-                                        jex.create('button')
-                                            .cls('px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors')
-                                            .text('Cancel')
-                                            .onClick(() => closeModal()),
-                                        jex.create('button')
-                                            .cls('px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors')
-                                            .text('Confirm')
-                                            .onClick(() => {
-                                                toast.success('Modal action confirmed!');
-                                                closeModal();
-                                            })
-                                    )
-                            )
-                    )
-            )
-            .onClick((e) => {
-                if (e.target === modal.ref) closeModal();
-            })
-            .mountToBody();
-
-        // Animate in
-        setTimeout(() => {
-            modal.select('div').style({ transform: 'scale(1)' });
-        }, 10);
-
-        // Re-initialize Lucide icons
-        lucide.createIcons();
-
-        function closeModal() {
+        #closeModal(modal) {
             modal.style({ opacity: '0' });
             modal.select('div').style({ transform: 'scale(0.95)' });
             setTimeout(() => modal.remove(), 200);
+            this.#logger.debug('Modal closed');
         }
-
-        logger.debug('Modal created:', title);
     }
 
-    // Global keyboard shortcuts
-    jex.onKey('Escape', () => {
-        // Close any open modals
-        jex.find('[class*="fixed"][class*="inset-0"]').forEach(modal => {
-            if (modal.ref.style.zIndex >= 50) {
-                modal.remove();
-            }
-        });
-    });
-
-    // Initialize demo
-    logger.info('All event handlers initialized');
-    toast.success('Jex Framework demo is ready!', 3000);
+    // Launch the application
+    JexApp.launch(JexFrameworkDemoApp);
 </script>
 </body>
 </html>
