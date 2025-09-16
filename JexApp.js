@@ -1,21 +1,21 @@
 /**
- * JexApp.js - Ultra-simplified app foundation integrated into Jex Framework
+ * JexApp.js - Ultra-simplified app foundation for Jex Framework
  *
  * CLASS STRUCTURE:
  * ---------------
  * Public Fields:
  *   - config {Object}: Application configuration
  *   - toast {JexToast}: Toast notification system
- *   - state {Object}: Application state - plain object structure
+ *   - state {Object}: Application state
  *   - dom {Object}: DOM element references
  *   - initialized {boolean}: Initialization status
  *
  * Private Fields:
  *   - #eventCleanup {Array}: Event cleanup functions
  *   - #loadingEl {Jex}: Loading overlay element
- *   - #package {JexPackage}: Reference to JexPackage instance
  *   - #jex {Jex}: DOM manipulation instance
  *   - #logger {JexLogger}: Logger instance
+ *   - #toast {JexToast}: Toast instance
  *
  * Public Methods:
  *   - constructor(config: Object): Creates the application
@@ -31,19 +31,20 @@
  *   - static launch(AppClass, config?): JexApp - Static app launcher
  *
  * Dependencies:
- *   - JexPackage: Unified package for complete Jex ecosystem
+ *   - Jex: Core DOM manipulation library
+ *   - JexLogger: Advanced logging and debugging system
+ *   - JexToast: Toast notification system
  *
  * Relations:
  *   - Part of: Jex Framework ecosystem
  *   - Extended by: All Jex-based applications
- *   - Uses: JexPackage for all framework components
+ *   - Uses: Individual components directly (no JexPackage dependency)
  *
- * Last Modified: 2025-01-16 - Updated to use JexPackage with raw GitHub imports
+ * Last Modified: 2025-09-16 - Removed JexPackage dependency to fix circular imports
  */
-import jexPackage from './JexPackage.js';
-/**
- * JexApp - Ultra-simplified app foundation for Jex Framework
- */
+
+import { jex, Jex } from './Jex.js';
+
 export class JexApp {
     // Public fields
     config = {};
@@ -55,14 +56,10 @@ export class JexApp {
     // Private fields
     #eventCleanup = [];
     #loadingEl = null;
-    #package = jexPackage;
     #jex = null;
     #logger = null;
+    #toast = null;
 
-    /**
-     * Create a new JexApp instance
-     * @param {Object} config - Application configuration
-     */
     constructor(config = {}) {
         this.config = {
             // Default configuration
@@ -84,29 +81,24 @@ export class JexApp {
         // Initialize state
         this.state = config.initialState || {};
 
-        // Setup package references
-        this.#jex = this.#package.jex;
-        this.#logger = this.#package.logger;
-        this.toast = this.#package.toast;
+        // Setup core references
+        this.#jex = jex;
 
-        this.#logger.debug('JexApp created:', this.config.name);
+        console.debug('JexApp created:', this.config.name);
     }
 
-    /**
-     * Initialize the application
-     * @returns {Promise<void>}
-     */
     async init() {
         try {
-            this.#logger.info('Initializing JexApp:', this.config.name);
+            console.info('Initializing JexApp:', this.config.name);
 
-            // Ensure package is initialized
-            if (!this.#package.isReady()) {
-                await this.#package.init();
+            // Load optional components dynamically
+            await this.#loadOptionalComponents();
+
+            // Initialize toast system if available
+            if (this.#toast) {
+                this.#toast.mount();
+                this.toast = this.#toast; // Expose publicly
             }
-
-            // Initialize toast system
-            this.toast.mount();
 
             // Setup header auto-hide if enabled
             if (this.config.enableHeader && this.config.headerAutoHide) {
@@ -130,83 +122,84 @@ export class JexApp {
             // Call ready hook
             this.onReady();
 
-            this.#logger.info('JexApp ready:', this.config.name);
+            console.info('JexApp ready:', this.config.name);
 
         } catch (error) {
-            this.#logger.error('JexApp initialization failed:', error);
-            this.toast.error('Application failed to initialize');
+            console.error('JexApp initialization failed:', error);
+            if (this.#toast) {
+                this.#toast.error('Application failed to initialize');
+            }
             throw error;
         }
     }
 
-    /**
-     * Setup common DOM elements
-     * @private
-     */
+    async #loadOptionalComponents() {
+        // Load logger
+        try {
+            const { logger } = await import('./JexLogger.js');
+            this.#logger = logger;
+            console.debug('Logger loaded');
+        } catch (error) {
+            console.warn('Logger not available:', error.message);
+        }
+
+        // Load toast
+        try {
+            const { toast } = await import('./JexToast.js');
+            this.#toast = toast;
+            console.debug('Toast loaded');
+        } catch (error) {
+            console.warn('Toast not available:', error.message);
+        }
+    }
+
     #setupCommonDOM() {
         // Find header
         const headerEl = document.querySelector(this.config.headerSelector);
         if (headerEl) {
-            this.dom.header = new this.#package.Jex(headerEl);
+            this.dom.header = new Jex(headerEl);
         }
 
         // Find main content area
         const mainEl = document.querySelector('main, #main, .main');
         if (mainEl) {
-            this.dom.main = new this.#package.Jex(mainEl);
+            this.dom.main = new Jex(mainEl);
         }
 
         // Store body reference
-        this.dom.body = new this.#package.Jex(document.body);
+        this.dom.body = new Jex(document.body);
     }
 
-    /**
-     * Setup header auto-hide functionality
-     * @private
-     */
     #setupHeaderAutoHide() {
-        // Use the improved static method
         JexApp.setupHeaderScroll(this.config.headerSelector.split(',')[0].trim().replace('#', ''));
     }
 
-    /**
-     * Setup keyboard shortcuts
-     * @private
-     */
     #setupKeyboardShortcuts() {
-        // F2 for debug console (if logger supports it)
-        const cleanup1 = this.#jex.onWindow('keydown', (e) => {
+        const cleanup = this.#jex.onWindow('keydown', (e) => {
             if (e.key === 'F2') {
                 e.preventDefault();
-                if (this.#logger.toggleConsole) {
+                if (this.#logger && this.#logger.toggleConsole) {
                     this.#logger.toggleConsole();
                 }
             }
         });
 
-        this.#eventCleanup.push(cleanup1);
+        this.#eventCleanup.push(cleanup);
     }
 
-    /**
-     * Hook called during initialization - override in subclass
-     */
     async onInit() {
         // Override in subclass
     }
 
-    /**
-     * Hook called when app is ready - override in subclass
-     */
     onReady() {
         // Override in subclass
-        this.toast.success(`${this.config.name} ready!`);
+        if (this.#toast) {
+            this.#toast.success(`${this.config.name} ready!`);
+        }
     }
 
-    /**
-     * Clean up the application
-     */
     destroy() {
-        this.#logger.info('Destroying JexApp:', this.config.name);
+        console.info('Destroying JexApp:', this.config.name);
 
         // Clean up event handlers
         this.#eventCleanup.forEach(cleanup => cleanup?.());
@@ -221,12 +214,8 @@ export class JexApp {
         this.initialized = false;
     }
 
-    /**
-     * Show simple loading overlay
-     * @param {string} message - Loading message
-     */
     showLoading(message = 'Loading...') {
-        if (this.#loadingEl) return; // Already showing
+        if (this.#loadingEl) return;
 
         this.#loadingEl = this.#jex.create('div')
             .cls('fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50')
@@ -239,64 +228,43 @@ export class JexApp {
             .mountToBody();
     }
 
-    /**
-     * Hide loading overlay
-     */
     hideLoading() {
         if (!this.#loadingEl) return;
-
         this.#loadingEl.remove();
         this.#loadingEl = null;
     }
 
-    /**
-     * Navigate to another page
-     * @param {string} url - URL to navigate to
-     */
     navigateTo(url) {
-        this.#logger.debug('Navigating to:', url);
+        console.debug('Navigating to:', url);
         window.location.href = url;
     }
 
-    /**
-     * Update application state
-     * @param {Object|Function} updates - State updates or updater function
-     */
     setState(updates) {
         if (typeof updates === 'function') {
             updates(this.state);
         } else {
             Object.assign(this.state, updates);
         }
-        this.#logger.debug('State updated:', this.state);
+        console.debug('State updated:', this.state);
     }
 
-    /**
-     * Setup header scroll behavior (static utility)
-     * @param {string} headerId - ID of header element (default: 'topHeader')
-     * @static
-     */
     static setupHeaderScroll(headerId = 'topHeader') {
         let lastScrollTop = 0;
-        const header = jexPackage.jex.$(headerId);
+        const header = jex.$(headerId);
         const scrollThreshold = 5;
 
         if (!header) {
-            jexPackage.logger.warn(`Header element not found: ${headerId}`);
+            console.warn(`Header element not found: ${headerId}`);
             return;
         }
 
-        // Listen to window scroll events
         window.addEventListener('scroll', () => {
             const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
 
-            // Only hide/show after scrolling past threshold
             if (Math.abs(scrollTop - lastScrollTop) > scrollThreshold) {
                 if (scrollTop > lastScrollTop && scrollTop > 100) {
-                    // Scrolling down & past 100px
                     header.cls('+header-hidden');
                 } else {
-                    // Scrolling up
                     header.cls('-header-hidden');
                 }
                 lastScrollTop = scrollTop;
@@ -304,19 +272,8 @@ export class JexApp {
         });
     }
 
-    /**
-     * Static method to launch an application
-     * @param {Class} AppClass - Application class to instantiate
-     * @param {Object} config - Configuration object
-     * @returns {Promise<JexApp>} The initialized application instance
-     */
     static async launch(AppClass = JexApp, config = {}) {
         try {
-            // Ensure package is ready
-            if (!jexPackage.isReady()) {
-                await jexPackage.init();
-            }
-
             // Wait for DOM to be ready
             if (document.readyState === 'loading') {
                 await new Promise(resolve => {
@@ -331,40 +288,23 @@ export class JexApp {
             // Store globally for debugging
             window.app = app;
 
-            jexPackage.logger.info('JexApp launched successfully:', config.name || 'Unknown App');
+            console.info('JexApp launched successfully:', config.name || 'Unknown App');
 
             return app;
 
         } catch (error) {
-            jexPackage.logger.error('Failed to launch JexApp:', error);
+            console.error('Failed to launch JexApp:', error);
             throw error;
         }
     }
 
-    /**
-     * Get the JexPackage instance
-     * @returns {JexPackage} The package instance
-     */
-    get package() {
-        return this.#package;
-    }
-
-    /**
-     * Get the Jex DOM manipulation instance
-     * @returns {Jex} The Jex instance
-     */
     get jex() {
         return this.#jex;
     }
 
-    /**
-     * Get the logger instance
-     * @returns {JexLogger} The logger instance
-     */
     get logger() {
         return this.#logger;
     }
 }
 
-// Export default for convenience
 export default JexApp;

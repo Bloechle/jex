@@ -30,14 +30,13 @@
  *
  * Dependencies:
  *   - Jex: DOM manipulation from Jex Framework
- *   - JexLogger: Logging from Jex Framework
  *
  * Relations:
  *   - Part of: Jex Framework widgets
  *   - Used by: Jex applications
- *   - Uses: jex, logger from Jex Framework
+ *   - Uses: jex from Jex Framework
  *
- * Last Modified: 2025-09-16 - Final corrected version
+ * Last Modified: 2025-09-16 - Lazy initialization pattern to prevent DOM conflicts
  */
 
 import { jex } from './Jex.js';
@@ -54,6 +53,7 @@ export class JexToast {
     #visibleToasts = 0;
     #activeToasts = new Map();
     #lastToast = null;
+    #stylesInjected = false;
 
     constructor(options = {}) {
         // Default configuration
@@ -117,21 +117,21 @@ export class JexToast {
             ...options
         };
 
-        // Initialize toast system
-        this.#initToastSystem();
+        console.debug('JexToast system initialized (lazy mode)');
     }
 
-    #initToastSystem() {
-        // Inject CSS animations
-        this.#injectStyles();
-
-        // Create container
-        this.#createContainer();
-
-        console.debug('JexToast system initialized');
+    #ensureInitialized() {
+        if (!this.#stylesInjected) {
+            this.#injectStyles();
+        }
+        if (!this.#mounted) {
+            this.mount();
+        }
     }
 
     #injectStyles() {
+        if (this.#stylesInjected) return;
+
         jex.injectStyles('jexToastStyles', `
             @keyframes jexToastSlideIn {
                 from {
@@ -180,13 +180,13 @@ export class JexToast {
                 transition: width linear;
             }
         `);
+
+        this.#stylesInjected = true;
     }
 
     #createContainer() {
-        // Determine position classes
         const positionClasses = this.#getPositionClasses();
 
-        // Create container with proper ID - NO CHAINING WITH .id() after creation!
         this.#dom.container = jex.create('div', 'jexToastContainer')
             .cls(
                 'fixed',
@@ -201,8 +201,6 @@ export class JexToast {
             )
             .attr('aria-live', 'polite')
             .attr('aria-label', 'Notifications');
-
-        this.mount();
     }
 
     #getPositionClasses() {
@@ -222,11 +220,12 @@ export class JexToast {
     }
 
     mount() {
-        if (!this.#mounted) {
-            this.#dom.container.mountToBody();
-            this.#mounted = true;
-            console.debug('JexToast mounted');
-        }
+        if (this.#mounted) return this;
+
+        this.#createContainer();
+        this.#dom.container.mountToBody();
+        this.#mounted = true;
+        console.debug('JexToast mounted');
         return this;
     }
 
@@ -248,7 +247,7 @@ export class JexToast {
                 'shadow-lg',
                 'border',
                 'overflow-hidden',
-                'transform-gpu', // Hardware acceleration
+                'transform-gpu',
                 this.options.maxWidth,
                 config.bgClass,
                 config.borderClass,
@@ -265,17 +264,17 @@ export class JexToast {
             .cls('flex', 'items-start', 'p-4', 'gap-3');
 
         // Icon
-        const icon = content.add('div')
+        content.add('div')
             .cls('flex-shrink-0', 'text-xl', 'leading-none')
             .text(config.icon);
 
         // Message
-        const messageEl = content.add('div')
+        content.add('div')
             .cls('flex-1', 'text-sm', 'font-medium', 'break-words', 'leading-relaxed')
             .text(message);
 
         // Close button
-        const closeBtn = content.add('button')
+        content.add('button')
             .cls(
                 'flex-shrink-0',
                 'ml-2',
@@ -318,9 +317,7 @@ export class JexToast {
     }
 
     show(type, message, duration = null) {
-        if (!this.#mounted) {
-            this.mount();
-        }
+        this.#ensureInitialized();
 
         const actualDuration = duration !== null ? duration : this.options.duration;
 
@@ -336,7 +333,6 @@ export class JexToast {
                 this.#queue.push({ type, message, duration: actualDuration });
                 return;
             } else {
-                // Remove oldest toast
                 this.#removeOldestToast();
             }
         }
@@ -348,17 +344,15 @@ export class JexToast {
         return this.#lastToast &&
             this.#lastToast.type === type &&
             this.#lastToast.message === message &&
-            (Date.now() - this.#lastToast.timestamp) < 1000; // 1 second window
+            (Date.now() - this.#lastToast.timestamp) < 1000;
     }
 
     #handleDuplicate(type, message) {
-        // Find existing toast and pulse it
         for (const [toastEl, data] of this.#activeToasts) {
             if (data.type === type && data.message === message) {
                 toastEl.cls('+jex-toast-pulse');
                 setTimeout(() => toastEl.cls('-jex-toast-pulse'), 300);
 
-                // Reset timer
                 if (data.timer) {
                     clearTimeout(data.timer);
                 }
@@ -371,11 +365,9 @@ export class JexToast {
     #showToast(type, message, duration) {
         const { toast, progressBar } = this.#createToastElement(message, type);
 
-        // Add to container with animation
         toast.cls('+jex-toast-enter');
         this.#dom.container.append(toast);
 
-        // Track toast
         const toastData = {
             type,
             message,
@@ -388,20 +380,17 @@ export class JexToast {
         this.#visibleToasts++;
         this.isVisible = true;
 
-        // Update last toast reference
         this.#lastToast = {
             type,
             message,
             timestamp: Date.now()
         };
 
-        // Setup auto-removal timer
         if (duration > 0) {
             toastData.timer = setTimeout(() => {
                 this.#removeToast(toast);
             }, duration);
 
-            // Animate progress bar
             if (progressBar) {
                 setTimeout(() => {
                     progressBar.style({
@@ -412,7 +401,6 @@ export class JexToast {
             }
         }
 
-        // Remove enter animation class
         setTimeout(() => {
             toast.cls('-jex-toast-enter');
         }, this.options.animationDuration);
@@ -424,26 +412,21 @@ export class JexToast {
         const toastData = this.#activeToasts.get(toastElement);
         if (!toastData) return;
 
-        // Clear timer
         if (toastData.timer) {
             clearTimeout(toastData.timer);
         }
 
-        // Add exit animation
         toastElement.cls('+jex-toast-exit');
 
-        // Remove after animation
         setTimeout(() => {
             toastElement.remove();
             this.#activeToasts.delete(toastElement);
             this.#visibleToasts--;
 
-            // Update visibility state
             if (this.#visibleToasts === 0) {
                 this.isVisible = false;
             }
 
-            // Process queue
             this.#processQueue();
         }, this.options.animationDuration);
     }
@@ -500,20 +483,14 @@ export class JexToast {
     }
 
     clearAll() {
-        // Clear all timers
         for (const toastData of this.#activeToasts.values()) {
             if (toastData.timer) {
                 clearTimeout(toastData.timer);
             }
         }
 
-        // Clear queue
         this.#queue = [];
-
-        // Remove all toasts
         this.#dom.container?.clear();
-
-        // Reset state
         this.#activeToasts.clear();
         this.#visibleToasts = 0;
         this.#lastToast = null;
@@ -528,15 +505,41 @@ export class JexToast {
             this.#mounted = false;
         }
 
-        // Remove injected styles
-        const styleEl = jex.$('jexToastStyles');
-        if (styleEl) {
-            styleEl.remove();
+        // Safe style removal using existence check
+        if (jex.$('?jexToastStyles')) {
+            jex.$('jexToastStyles').remove();
         }
 
+        this.#stylesInjected = false;
         console.debug('JexToast destroyed');
     }
 }
 
-// Create and export global instance
-export const toast = new JexToast();
+// Lazy singleton pattern - no instance created until first use
+let _toast = null;
+export const toast = {
+    mount() { return this._getInstance().mount(); },
+    success(msg, dur) { return this._getInstance().success(msg, dur); },
+    error(msg, dur) { return this._getInstance().error(msg, dur); },
+    warning(msg, dur) { return this._getInstance().warning(msg, dur); },
+    info(msg, dur) { return this._getInstance().info(msg, dur); },
+    command(msg, dur) { return this._getInstance().command(msg, dur); },
+    show(type, msg, dur) { return this._getInstance().show(type, msg, dur); },
+    check(cond, msg, cb) { return this._getInstance().check(cond, msg, cb); },
+    clearAll() { return this._getInstance().clearAll(); },
+    destroy() {
+        if (_toast) {
+            _toast.destroy();
+            _toast = null;
+        }
+    },
+
+    _getInstance() {
+        if (!_toast) {
+            _toast = new JexToast();
+        }
+        return _toast;
+    },
+
+    get isVisible() { return _toast ? _toast.isVisible : false; }
+};

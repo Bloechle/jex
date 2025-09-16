@@ -72,10 +72,15 @@
      *   - Demonstrates: Basic Jex Framework capabilities
      *   - Uses: Minimal subset of framework features
      *
-     * Last Modified: 2025-01-16 - Simplified elegant demo
+     * Last Modified: 2025-09-16 - Added CDN/Local switching capability
      */
 
     class SimpleJexDemo {
+        // Configuration - Easy switching between CDN and local files
+        static #CDN_BASE = './' //https://cdn.jsdelivr.net/gh/Bloechle/jex@latest';
+        static #LOCAL_BASE = '.';
+        static #USE_CDN = false; // Set to true for CDN, false for local files
+
         // Public fields
         boxCount = 0;
 
@@ -84,10 +89,17 @@
         #logger = null;
         #toast = null;
 
+        #getImportPath(filename) {
+            const base = SimpleJexDemo.#USE_CDN ? SimpleJexDemo.#CDN_BASE : SimpleJexDemo.#LOCAL_BASE;
+            return `${base}/${filename}`;
+        }
+
         async init() {
+            console.info(`Loading Jex components from: ${SimpleJexDemo.#USE_CDN ? 'CDN' : 'Local files'}`);
+
             // Load Jex core (required)
             try {
-                const { jex } = await import('https://cdn.jsdelivr.net/gh/Bloechle/jex@latest/Jex.js');
+                const { jex } = await import(this.#getImportPath('Jex.js'));
                 this.#jex = jex;
                 console.log('✅ Jex loaded');
             } catch (error) {
@@ -97,7 +109,7 @@
 
             // Load optional components
             try {
-                const { logger } = await import('https://cdn.jsdelivr.net/gh/Bloechle/jex@latest/JexLogger.js');
+                const { logger } = await import(this.#getImportPath('JexLogger.js'));
                 this.#logger = logger;
                 console.log('✅ Logger loaded');
             } catch (error) {
@@ -105,7 +117,7 @@
             }
 
             try {
-                const { toast } = await import('https://cdn.jsdelivr.net/gh/Bloechle/jex@latest/JexToast.js');
+                const { toast } = await import(this.#getImportPath('JexToast.js'));
                 this.#toast = toast;
                 this.#toast.mount();
                 console.log('✅ Toast loaded');
