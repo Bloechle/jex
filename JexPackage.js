@@ -40,8 +40,8 @@
 // Import all Jex ecosystem components from GitHub raw URLs
 // Import all Jex ecosystem components with relative paths
 import { jex, Jex, JexCollection, JEX_VERSION } from './Jex.js';
-import { logger, JexLogger, LOGGER_VERSION } from './JexLogger.js';
 import { toast, JexToast } from './JexToast.js';
+import { logger, JexLogger, LOGGER_VERSION } from './JexLogger.js';
 import { inspector, JexInspector, INSPECTOR_VERSION } from './JexInspector.js';
 import { JexApp } from './JexApp.js';
 
