@@ -41,7 +41,6 @@
  */
 
 import { jex } from './Jex.js';
-import { logger } from './JexLogger.js';
 
 export class JexToast {
     // Public fields
@@ -129,7 +128,7 @@ export class JexToast {
         // Create container
         this.#createContainer();
 
-        logger.debug('JexToast system initialized');
+        console.debug('JexToast system initialized');
     }
 
     #injectStyles() {
@@ -202,6 +201,7 @@ export class JexToast {
             )
             .attr('aria-live', 'polite')
             .attr('aria-label', 'Notifications');
+
         this.mount();
     }
 
@@ -225,7 +225,7 @@ export class JexToast {
         if (!this.#mounted) {
             this.#dom.container.mountToBody();
             this.#mounted = true;
-            logger.debug('JexToast mounted');
+            console.debug('JexToast mounted');
         }
         return this;
     }
@@ -417,7 +417,7 @@ export class JexToast {
             toast.cls('-jex-toast-enter');
         }, this.options.animationDuration);
 
-        logger.debug(`Toast shown: ${type} - ${message}`);
+        console.debug(`Toast shown: ${type} - ${message}`);
     }
 
     #removeToast(toastElement) {
@@ -464,17 +464,17 @@ export class JexToast {
 
     // Convenience methods
     success(message, duration) {
-        logger.info(`Toast Success: ${message}`);
+        console.info(`Toast Success: ${message}`);
         this.show('success', message, duration);
     }
 
     error(message, duration) {
-        logger.error(`Toast Error: ${message}`);
+        console.error(`Toast Error: ${message}`);
         this.show('error', message, duration);
     }
 
     warning(message, duration) {
-        logger.warn(`Toast Warning: ${message}`);
+        console.warn(`Toast Warning: ${message}`);
         this.show('warning', message, duration);
     }
 
@@ -534,7 +534,7 @@ export class JexToast {
             styleEl.remove();
         }
 
-        logger.debug('JexToast destroyed');
+        console.debug('JexToast destroyed');
     }
 }
 
