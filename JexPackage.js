@@ -38,11 +38,12 @@
  */
 
 // Import all Jex ecosystem components from GitHub raw URLs
-import { jex, Jex, JexCollection, JEX_VERSION } from 'https://raw.githubusercontent.com/Bloechle/jex/main/Jex.js';
-import { logger, JexLogger, LOGGER_VERSION } from 'https://raw.githubusercontent.com/Bloechle/jex/main/JexLogger.js';
-import { toast, JexToast } from 'https://raw.githubusercontent.com/Bloechle/jex/main/JexToast.js';
-import { inspector, JexInspector, INSPECTOR_VERSION } from 'https://raw.githubusercontent.com/Bloechle/jex/main/JexInspector.js';
-import { JexApp } from 'https://raw.githubusercontent.com/Bloechle/jex/main/JexApp.js';
+// Import all Jex ecosystem components with relative paths
+import { jex, Jex, JexCollection, JEX_VERSION } from './Jex.js';
+import { logger, JexLogger, LOGGER_VERSION } from './JexLogger.js';
+import { toast, JexToast } from './JexToast.js';
+import { inspector, JexInspector, INSPECTOR_VERSION } from './JexInspector.js';
+import { JexApp } from './JexApp.js';
 
 // [rest of file remains the same]
 

@@ -40,8 +40,8 @@
  * Last Modified: 2025-09-16 - Final corrected version
  */
 
-import { jex } from 'https://raw.githubusercontent.com/Bloechle/jex/main/Jex.js';
-import { logger } from 'https://raw.githubusercontent.com/Bloechle/jex/main/JexLogger.js';
+import { jex } from './Jex.js';
+import { logger } from './JexLogger.js';
 
 export class JexToast {
     // Public fields

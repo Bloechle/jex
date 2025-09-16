@@ -17,8 +17,14 @@ const PORT = process.env.PORT || 3000;
 app.use(morgan('combined'));
 app.use(cors());
 
-// Serve static files from current directory
-app.use(express.static(__dirname));
+// CRITICAL FIX: Set correct MIME type for JavaScript modules
+app.use(express.static(__dirname, {
+    setHeaders: (res, path) => {
+        if (path.endsWith('.js')) {
+            res.setHeader('Content-Type', 'application/javascript; charset=utf-8');
+        }
+    }
+}));
 
 // Default route to serve index.html
 app.get('/', (req, res) => {
