@@ -73,13 +73,13 @@ export class JexPackage {
             logger: logger,
             JexLogger: JexLogger,
 
-            // Toast notifications
-            toast: toast,
-            JexToast: JexToast,
-
             // DOM inspector
             inspector: inspector,
             JexInspector: JexInspector,
+
+            // Toast notifications
+            toast: toast,
+            JexToast: JexToast,
 
             // Application framework
             JexApp: JexApp

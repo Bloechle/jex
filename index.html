@@ -127,7 +127,7 @@
 
         // Configuration - easily switch between CDN and local
     const { JexApp } = await import('./JexApp.js');
-    JexApp.USE_CDN = false; // Set to true for CDN, false for local files
+    JexApp.USE_CDN = true; // Set to true for CDN, false for local files
 
     class JexDemo extends JexApp {
         // Public fields
