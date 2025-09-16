@@ -32,12 +32,19 @@
  * Last Modified: 2025-01-16 - Updated to use raw GitHub imports
  */
 
-// Import all Jex ecosystem components from raw GitHub
-import { jex, Jex, JexCollection, JEX_VERSION } from 'https://cdn.jsdelivr.net/gh/Bloechle/jex@main/Jex.js';
-import { logger, JexLogger, LOGGER_VERSION } from 'https://cdn.jsdelivr.net/gh/Bloechle/jex@main/JexLogger.js';
-import { toast, JexToast } from 'https://cdn.jsdelivr.net/gh/Bloechle/jex@main/JexToast.js';
-import { inspector, JexInspector, INSPECTOR_VERSION } from 'https://cdn.jsdelivr.net/gh/Bloechle/jex@main/JexInspector.js';
-import { JexApp } from 'https://cdn.jsdelivr.net/gh/Bloechle/jex@main/JexApp.js';
+/**
+ * JexPackage.js - Unified package for the complete Jex ecosystem
+ * [rest of header remains the same]
+ */
+
+// Import all Jex ecosystem components from GitHub raw URLs
+import { jex, Jex, JexCollection, JEX_VERSION } from 'https://raw.githubusercontent.com/Bloechle/jex/main/Jex.js';
+import { logger, JexLogger, LOGGER_VERSION } from 'https://raw.githubusercontent.com/Bloechle/jex/main/JexLogger.js';
+import { toast, JexToast } from 'https://raw.githubusercontent.com/Bloechle/jex/main/JexToast.js';
+import { inspector, JexInspector, INSPECTOR_VERSION } from 'https://raw.githubusercontent.com/Bloechle/jex/main/JexInspector.js';
+import { JexApp } from 'https://raw.githubusercontent.com/Bloechle/jex/main/JexApp.js';
+
+// [rest of file remains the same]
 
 export class JexPackage {
     // Public fields
