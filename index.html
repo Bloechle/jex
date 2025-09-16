@@ -6,6 +6,7 @@
     <title>Jex Framework Demo</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+
     <script>
         tailwind.config = {
             darkMode: 'class',
@@ -126,8 +127,8 @@
      */
 
         // Configuration - easily switch between CDN and local
-    const { JexApp } = await import('./JexApp.js');
-    JexApp.USE_CDN = true; // Set to true for CDN, false for local files
+    import { JexApp } from './JexApp.js';
+    //import { JexApp } from 'https://esm.sh/gh/Bloechle/jex/JexApp.js';
 
     class JexDemo extends JexApp {
         // Public fields

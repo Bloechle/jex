@@ -195,7 +195,6 @@ export {
     JexToast,
     inspector,
     JexInspector,
-    JexApp
 };
 
 // Auto-initialize package
