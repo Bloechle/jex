@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Notes - Jex Framework</title>
+    <title>Jex Framework Demo</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <script>
@@ -13,16 +13,9 @@
                 extend: {
                     colors: {
                         dark: {
-                            50: '#f8fafc',
-                            100: '#f1f5f9',
-                            200: '#e2e8f0',
-                            300: '#cbd5e1',
-                            400: '#94a3b8',
-                            500: '#64748b',
-                            600: '#475569',
-                            700: '#334155',
-                            800: '#1e293b',
-                            900: '#0f172a',
+                            50: '#f8fafc', 100: '#f1f5f9', 200: '#e2e8f0',
+                            300: '#cbd5e1', 400: '#94a3b8', 500: '#64748b',
+                            600: '#475569', 700: '#334155', 800: '#1e293b', 900: '#0f172a'
                         }
                     }
                 }
@@ -32,233 +25,287 @@
 </head>
 <body class="dark bg-dark-900 text-gray-100 min-h-screen">
 
-<div class="max-w-2xl mx-auto px-6 py-8">
-
-    <!-- Header -->
-    <div class="text-center mb-8">
-        <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-blue-600 rounded-2xl mx-auto mb-4 flex items-center justify-center shadow-lg">
-            <i data-lucide="notebook-pen" class="w-6 h-6 text-white"></i>
-        </div>
-        <h1 class="text-2xl font-light text-gray-100">Notes</h1>
-        <p class="text-sm text-gray-400 mt-1">Simple, elegant note taking</p>
+<!-- Header -->
+<div class="max-w-4xl mx-auto px-6 py-12 text-center">
+    <div class="w-16 h-16 bg-gradient-to-br from-purple-500 to-blue-600 rounded-2xl mx-auto mb-6 flex items-center justify-center shadow-lg">
+        <span class="text-white font-bold text-2xl">J</span>
     </div>
+    <h1 class="text-4xl font-light text-gray-100 mb-3">Jex Framework</h1>
+    <p class="text-gray-400 text-lg">Lightweight DOM manipulation with zero dependencies</p>
+</div>
 
-    <!-- Note Input -->
-    <div class="bg-dark-800 rounded-2xl p-6 mb-8 border border-dark-700">
-        <textarea
-                id="noteInput"
-                placeholder="What's on your mind?"
-                class="w-full bg-transparent text-gray-100 placeholder-gray-500 resize-none border-0 outline-none text-lg leading-relaxed"
-                rows="3"
-        ></textarea>
-        <div class="flex justify-between items-center mt-4 pt-4 border-t border-dark-700">
-            <span id="charCount" class="text-xs text-gray-500">0 characters</span>
-            <button
-                    id="addNote"
-                    class="px-6 py-2 bg-gradient-to-r from-purple-500 to-blue-600 text-white rounded-xl text-sm font-medium hover:shadow-lg transition-all duration-200 transform hover:scale-105"
-            >
-                Save Note
+<!-- Demo Section -->
+<div class="max-w-4xl mx-auto px-6 pb-12">
+
+    <!-- Demo Controls -->
+    <div class="bg-dark-800 rounded-2xl p-8 border border-dark-700 mb-8">
+        <h2 class="text-xl font-medium text-gray-100 mb-6">Interactive Demo</h2>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <button id="addBox" class="px-6 py-3 bg-gradient-to-r from-purple-500 to-blue-600 text-white rounded-xl font-medium hover:shadow-lg transition-all duration-200 transform hover:scale-105">
+                Add Box
+            </button>
+            <button id="showToast" class="px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl font-medium hover:shadow-lg transition-all duration-200 transform hover:scale-105">
+                Show Toast
+            </button>
+            <button id="logMessage" class="px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-600 text-white rounded-xl font-medium hover:shadow-lg transition-all duration-200 transform hover:scale-105">
+                Log Message
+            </button>
+            <button id="clearAll" class="px-6 py-3 bg-gradient-to-r from-red-500 to-rose-600 text-white rounded-xl font-medium hover:shadow-lg transition-all duration-200 transform hover:scale-105">
+                Clear All
             </button>
         </div>
     </div>
 
-    <!-- Notes List -->
-    <div id="notesList" class="space-y-4">
-        <!-- Notes will appear here -->
-    </div>
-
-    <!-- Empty State -->
-    <div id="emptyState" class="text-center py-16 text-gray-500">
-        <div class="w-20 h-20 mx-auto mb-6 bg-dark-800 rounded-full flex items-center justify-center border border-dark-700">
-            <i data-lucide="feather" class="w-10 h-10 text-gray-600"></i>
+    <!-- Demo Area -->
+    <div class="bg-dark-800 rounded-2xl border border-dark-700 overflow-hidden">
+        <div class="p-6 border-b border-dark-700">
+            <h3 class="text-lg font-medium text-gray-100 flex items-center">
+                <i data-lucide="play-circle" class="w-5 h-5 mr-2 text-purple-400"></i>
+                Demo Area
+            </h3>
         </div>
-        <p class="text-lg font-light mb-2 text-gray-400">No notes yet</p>
-        <p class="text-sm text-gray-600">Your thoughts will appear here</p>
+        <div id="demoArea" class="p-8 min-h-[300px] flex items-center justify-center">
+            <div class="text-center text-gray-500">
+                <div class="w-20 h-20 mx-auto mb-4 bg-dark-700 rounded-full flex items-center justify-center border border-dark-600">
+                    <i data-lucide="mouse-pointer-click" class="w-10 h-10 text-gray-600"></i>
+                </div>
+                <p class="text-lg font-medium text-gray-400 mb-2">Ready to interact</p>
+                <p class="text-sm text-gray-600">Click the buttons above to see Jex in action</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Footer -->
+<div class="max-w-4xl mx-auto px-6 pb-8 text-center">
+    <div class="flex items-center justify-center space-x-6 text-sm text-gray-500">
+        <span class="flex items-center">
+            <kbd class="px-2 py-1 bg-dark-800 rounded border border-dark-600 mr-2">F2</kbd>
+            Debug Console
+        </span>
+        <span class="flex items-center">
+            <i data-lucide="github" class="w-4 h-4 mr-2"></i>
+            Open Source
+        </span>
+        <span class="flex items-center">
+            <i data-lucide="zap" class="w-4 h-4 mr-2"></i>
+            Zero Dependencies
+        </span>
     </div>
 </div>
 
 <script type="module">
     /**
-     * NotesApp.js - Minimal elegant note-taking app
+     * JexDemo.js - Elegant demonstration of Jex Framework capabilities
      *
      * CLASS STRUCTURE:
      * ---------------
+     * Public Fields:
+     *   - boxCount {number}: Counter for created interactive boxes
+     *
      * Private Fields:
-     *   - #notes {Array}: Array of note objects
-     *   - #noteCounter {number}: Auto-incrementing note ID
+     *   - #colors {Array}: Available gradient color combinations
+     *   - #animations {Array}: Available animation effects
      *
      * Public Methods:
-     *   - onInit(): Promise<void> - Setup the notes app
-     *   - addNote(text: string): void - Add a new note
-     *   - deleteNote(noteId: number): void - Delete a note
+     *   - onInit(): Promise<void> - Initialize the demo application
+     *   - addBox(): void - Create and add an interactive box
+     *   - showToast(): void - Display toast notification
+     *   - logMessage(): void - Log demo message with data
+     *   - clearAll(): void - Clear demo area and reset state
      *
-     * Last Modified: 2025-09-16 - Minimal elegant implementation
+     * Dependencies:
+     *   - JexApp: Base application framework
+     *   - All Jex components loaded dynamically
+     *
+     * Relations:
+     *   - Extends: JexApp for application foundation
+     *   - Demonstrates: Core Jex Framework features
+     *
+     * Last Modified: 2025-09-16 - Dark theme demo with enhanced interactivity
      */
 
+        // Configuration - easily switch between CDN and local
     const { JexApp } = await import('./JexApp.js');
+    JexApp.USE_CDN = false; // Set to true for CDN, false for local files
 
-    class NotesApp extends JexApp {
-        #notes = [];
-        #noteCounter = 1;
+    class JexDemo extends JexApp {
+        // Public fields
+        boxCount = 0;
+
+        // Private fields
+        #colors = [
+            'from-purple-500 to-pink-500',
+            'from-blue-500 to-cyan-500',
+            'from-green-500 to-emerald-500',
+            'from-amber-500 to-orange-500',
+            'from-red-500 to-rose-500',
+            'from-indigo-500 to-purple-500',
+            'from-teal-500 to-green-500',
+            'from-orange-500 to-red-500'
+        ];
+
+        #animations = [
+            'animate-bounce',
+            'animate-pulse',
+            'animate-spin',
+            'animate-ping'
+        ];
 
         constructor() {
             super({
-                name: 'Notes',
+                name: 'Jex Framework Demo',
                 version: '1.0.0',
                 enableKeyboardShortcuts: true
             });
         }
 
         async onInit() {
-            this.#loadNotes();
-            this.#setupEvents();
-            this.#render();
+            this.#setupEventHandlers();
+            console.info('Jex Demo ready - try the interactive buttons!');
         }
 
         onReady() {
-            // Silent ready - no toast notification
-            console.log('Notes app ready');
-        }
-
-        #setupEvents() {
-            const input = this.jex.$('noteInput');
-            const addBtn = this.jex.$('addNote');
-
-            // Character counter
-            input?.on('input', () => {
-                const count = input.value().length;
-                this.jex.$('charCount')?.text(`${count} characters`);
-
-                // Enable/disable button
-                if (count > 0) {
-                    addBtn?.cls('-opacity-50').props('disabled', false);
-                } else {
-                    addBtn?.cls('+opacity-50').props('disabled', true);
-                }
-            });
-
-            // Add note
-            addBtn?.onClick(() => this.#handleAddNote());
-
-            // Ctrl+Enter to save
-            input?.on('keydown', (e) => {
-                if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
-                    e.preventDefault();
-                    this.#handleAddNote();
-                }
-            });
-        }
-
-        #handleAddNote() {
-            const input = this.jex.$('noteInput');
-            const text = input.value().trim();
-
-            if (text) {
-                this.addNote(text);
-                input.value('');
-                this.jex.$('charCount')?.text('0 characters');
-                this.jex.$('addNote')?.cls('+opacity-50').props('disabled', true);
+            // Silent initialization for demo
+            if (this.toast) {
+                this.toast.success('Jex Framework Demo loaded successfully!');
             }
         }
 
-        addNote(text) {
-            const note = {
-                id: this.#noteCounter++,
-                text: text,
-                createdAt: new Date().toISOString()
+        #setupEventHandlers() {
+            // Button event handlers using Jex
+            this.jex.$('addBox')?.onClick(() => this.addBox());
+            this.jex.$('showToast')?.onClick(() => this.showToast());
+            this.jex.$('logMessage')?.onClick(() => this.logMessage());
+            this.jex.$('clearAll')?.onClick(() => this.clearAll());
+
+            // Keyboard shortcuts
+            this.jex.onKey('Enter', () => this.addBox());
+            this.jex.onKey('Space', (e) => {
+                e.preventDefault();
+                this.showToast();
+            });
+        }
+
+        addBox() {
+            this.boxCount++;
+            const colorGradient = this.#colors[Math.floor(Math.random() * this.#colors.length)];
+            const animation = this.#animations[Math.floor(Math.random() * this.#animations.length)];
+
+            const demoArea = this.jex.$('demoArea');
+
+            // Clear placeholder on first box
+            if (this.boxCount === 1) {
+                demoArea.clear();
+            }
+
+            // Create interactive box using Jex
+            const box = this.jex.create('div')
+                .cls(`w-20 h-20 bg-gradient-to-br ${colorGradient} rounded-2xl m-3 flex items-center justify-center text-white font-bold cursor-pointer transform transition-all duration-300 hover:scale-110 shadow-lg opacity-0`)
+                .text(this.boxCount)
+                .attr('title', `Box #${this.boxCount} - Click to animate!`)
+                .onClick(() => {
+                    box.cls(`+${animation}`);
+                    setTimeout(() => box.cls(`-${animation}`), 2000);
+
+                    if (this.toast) {
+                        this.toast.info(`Box #${this.boxCount} animated!`);
+                    }
+                });
+
+            demoArea.append(box);
+
+            // Smooth fade-in animation
+            setTimeout(() => box.cls('+opacity-100'), 50);
+
+            this.logger?.debug('Box created:', {
+                id: this.boxCount,
+                color: colorGradient,
+                animation
+            });
+        }
+
+        showToast() {
+            if (this.toast) {
+                const messages = [
+                    'Hello from Jex Framework! 👋',
+                    'Dark theme looks amazing! 🌙',
+                    'Zero dependencies, maximum power! ⚡',
+                    'Built with vanilla JavaScript! 🍦',
+                    'Lightweight and fast! 🚀'
+                ];
+
+                const message = messages[Math.floor(Math.random() * messages.length)];
+                this.toast.success(message);
+            } else {
+                // Fallback if toast not available
+                const message = 'Toast system not available - check console for details';
+                alert(message);
+                console.warn(message);
+            }
+        }
+
+        logMessage() {
+            const timestamp = new Date().toLocaleTimeString();
+            const message = `Demo interaction logged at ${timestamp}`;
+
+            const logData = {
+                boxCount: this.boxCount,
+                timestamp: timestamp,
+                userAgent: navigator.userAgent.substring(0, 50) + '...',
+                screenSize: `${window.screen.width}x${window.screen.height}`,
+                demo: 'Jex Framework Interactive Demo'
             };
 
-            this.#notes.unshift(note);
-            this.#saveNotes();
-            this.#render();
-        }
-
-        deleteNote(noteId) {
-            this.#notes = this.#notes.filter(n => n.id !== noteId);
-            this.#saveNotes();
-            this.#render();
-        }
-
-        #render() {
-            const notesList = this.jex.$('notesList');
-            const emptyState = this.jex.$('emptyState');
-
-            notesList.clear();
-
-            if (this.#notes.length === 0) {
-                emptyState.show();
+            if (this.logger) {
+                this.logger.info(message, logData);
+                this.toast?.info('Message logged - press F2 to view console');
             } else {
-                emptyState.hide();
-                this.#notes.forEach(note => {
-                    const noteEl = this.#createNoteElement(note);
-                    notesList.append(noteEl);
-                });
+                console.log(message, logData);
+                alert('Message logged to browser console');
             }
         }
 
-        #createNoteElement(note) {
-            const timeAgo = this.#getTimeAgo(note.createdAt);
+        clearAll() {
+            const demoArea = this.jex.$('demoArea');
 
-            const noteEl = this.jex.create('div')
-                .cls('bg-dark-800 rounded-2xl p-6 border border-dark-700 hover:border-dark-600 transition-all duration-200 group')
-                .attr('data-note-id', note.id);
+            // Smooth clear animation
+            demoArea.cls('+opacity-50 +scale-95');
 
-            // Note text
-            noteEl.add('p')
-                .cls('text-gray-100 leading-relaxed mb-4 whitespace-pre-wrap')
-                .text(note.text);
+            setTimeout(() => {
+                demoArea.clear();
 
-            // Footer
-            const footer = noteEl.add('div')
-                .cls('flex justify-between items-center text-xs');
+                // Restore placeholder
+                const placeholder = this.jex.create('div')
+                    .cls('text-center text-gray-500')
+                    .html(`
+                        <div class="w-20 h-20 mx-auto mb-4 bg-dark-700 rounded-full flex items-center justify-center border border-dark-600">
+                            <i data-lucide="mouse-pointer-click" class="w-10 h-10 text-gray-600"></i>
+                        </div>
+                        <p class="text-lg font-medium text-gray-400 mb-2">Ready to interact</p>
+                        <p class="text-sm text-gray-600">Click the buttons above to see Jex in action</p>
+                    `);
 
-            footer.add('span')
-                .cls('text-gray-500')
-                .text(timeAgo);
+                demoArea.append(placeholder).cls('-opacity-50 -scale-95');
 
-            footer.add('button')
-                .cls('text-gray-600 hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100 p-1')
-                .html('<i data-lucide="trash-2" class="w-4 h-4"></i>')
-                .onClick(() => this.deleteNote(note.id));
+                // Reinitialize Lucide icons for the new placeholder
+                lucide.createIcons();
 
-            return noteEl;
-        }
+                this.boxCount = 0;
 
-        #getTimeAgo(dateString) {
-            const now = new Date();
-            const date = new Date(dateString);
-            const diffMs = now - date;
-            const diffMins = Math.floor(diffMs / 60000);
-            const diffHours = Math.floor(diffMs / 3600000);
-            const diffDays = Math.floor(diffMs / 86400000);
-
-            if (diffMins < 1) return 'Just now';
-            if (diffMins < 60) return `${diffMins}m ago`;
-            if (diffHours < 24) return `${diffHours}h ago`;
-            if (diffDays < 7) return `${diffDays}d ago`;
-            return date.toLocaleDateString();
-        }
-
-        #saveNotes() {
-            localStorage.setItem('jex-notes', JSON.stringify(this.#notes));
-        }
-
-        #loadNotes() {
-            try {
-                const saved = localStorage.getItem('jex-notes');
-                if (saved) {
-                    this.#notes = JSON.parse(saved);
-                    const maxId = Math.max(0, ...this.#notes.map(n => n.id));
-                    this.#noteCounter = maxId + 1;
+                if (this.toast) {
+                    this.toast.info('Demo cleared - ready for new interactions!');
                 }
-            } catch (error) {
-                this.#notes = [];
-            }
+
+                this.logger?.info('Demo area cleared', { previousBoxCount: this.boxCount });
+            }, 300);
         }
     }
 
-    // Launch app
-    await NotesApp.launch(NotesApp);
+    // Launch the demo application
+    const demo = await JexDemo.launch(JexDemo);
+
+    // Initialize Lucide icons
     lucide.createIcons();
 </script>
 

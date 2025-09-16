@@ -49,7 +49,7 @@ export class JexApp {
     // Configuration for CDN/Local switching
     static CDN_BASE = 'https://cdn.jsdelivr.net/gh/Bloechle/jex@latest';
     static LOCAL_BASE = '.';
-    static USE_CDN = false;
+    static USE_CDN = true;
 
     // Dark theme configuration - the only theme available
     static DARK_THEME = {
@@ -305,86 +305,6 @@ export class JexApp {
                 lastScrollTop = scrollTop;
             }
         });
-    }
-
-    static createDarkApp(title, icon = 'app-window') {
-        return `<!DOCTYPE html>
-<html lang="en" class="dark">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>${title} - Jex Framework</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        dark: {
-                            50: '#f8fafc', 100: '#f1f5f9', 200: '#e2e8f0',
-                            300: '#cbd5e1', 400: '#94a3b8', 500: '#64748b',
-                            600: '#475569', 700: '#334155', 800: '#1e293b', 900: '#0f172a'
-                        }
-                    }
-                }
-            }
-        }
-    </script>
-</head>
-<body class="dark bg-dark-900 text-gray-100 min-h-screen">
-
-<div class="max-w-4xl mx-auto px-6 py-8">
-    
-    <!-- Header -->
-    <div class="text-center mb-8">
-        <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-blue-600 rounded-2xl mx-auto mb-4 flex items-center justify-center shadow-lg">
-            <i data-lucide="${icon}" class="w-6 h-6 text-white"></i>
-        </div>
-        <h1 class="text-3xl font-light text-gray-100">${title}</h1>
-        <p class="text-gray-400 mt-2">Built with Jex Framework</p>
-    </div>
-
-    <!-- App Content -->
-    <div id="appContent">
-        <!-- Your app content goes here -->
-    </div>
-</div>
-
-<script type="module">
-    const { JexApp } = await import('./JexApp.js');
-    
-    class ${title.replace(/\s+/g, '')}App extends JexApp {
-        constructor() {
-            super({
-                name: '${title}',
-                version: '1.0.0'
-            });
-        }
-
-        async onInit() {
-            this.#setupUI();
-        }
-
-        #setupUI() {
-            const content = this.jex.$('appContent');
-            
-            const card = this.jex.create('div')
-                .cls(JexApp.DARK_THEME.classes.card)
-                .html('<p class="text-gray-100">Welcome to your new dark app!</p>');
-            
-            content.append(card);
-        }
-    }
-
-    // Launch app
-    await ${title.replace(/\s+/g, '')}App.launch(${title.replace(/\s+/g, '')}App);
-    lucide.createIcons();
-</script>
-
-</body>
-</html>`;
     }
 
     static async launch(AppClass = JexApp, config = {}) {
