@@ -37,7 +37,7 @@
  *   - Used by: Jex applications
  *   - Uses: jex, logger from Jex Framework
  *
- * Last Modified: 2025-09-11 - Renamed from TopToast to JexToast
+ * Last Modified: 2025-09-16 - Final corrected version
  */
 
 // Use CDN imports for Jex framework
@@ -188,8 +188,8 @@ export class JexToast {
         // Determine position classes
         const positionClasses = this.#getPositionClasses();
 
-        this.#dom.container = jex.create('div')
-            .id('jexToastContainer')
+        // Create container with proper ID - NO CHAINING WITH .id() after creation!
+        this.#dom.container = jex.create('div', 'jexToastContainer')
             .cls(
                 'fixed',
                 'z-[10000]',
@@ -528,7 +528,11 @@ export class JexToast {
             this.#mounted = false;
         }
 
-        jex.remove('jexToastStyles');
+        // Remove injected styles
+        const styleEl = jex.$('jexToastStyles');
+        if (styleEl) {
+            styleEl.remove();
+        }
 
         logger.debug('JexToast destroyed');
     }

@@ -1,0 +1,76 @@
+{
+  "name": "jex",
+  "version": "2025.07.02",
+  "description": "Lightweight DOM manipulation library with jQuery-like syntax and zero dependencies",
+  "main": "Jex.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js",
+    "dev": "node server.js",
+    "serve": "node server.js",
+    "build": "echo \"No build step needed - vanilla JS library\"",
+    "lint": "echo \"Add ESLint configuration if needed\"",
+    "docs": "echo \"Generate documentation from JSDoc comments\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Bloechle/jex.git"
+  },
+  "keywords": [
+    "javascript",
+    "dom",
+    "manipulation",
+    "jquery",
+    "vanilla",
+    "lightweight",
+    "zero-dependencies",
+    "logger",
+    "toast",
+    "inspector",
+    "framework"
+  ],
+  "author": "TOPLabs",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Bloechle/jex/issues"
+  },
+  "homepage": "https://github.com/Bloechle/jex#readme",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "debug": "^4.4.3",
+    "express": "^4.18.2",
+    "morgan": "^1.10.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "files": [
+    "Jex.js",
+    "JexLogger.js",
+    "JexInspector.js",
+    "JexToast.js",
+    "README.md",
+    "LICENSE",
+    "jex-logo.svg",
+    "index.html"
+  ],
+  "exports": {
+    ".": "./Jex.js",
+    "./Jex": "./Jex.js",
+    "./JexLogger": "./JexLogger.js",
+    "./JexInspector": "./JexInspector.js",
+    "./JexToast": "./JexToast.js"
+  },
+  "browser": {
+    "./Jex.js": "./Jex.js",
+    "./JexLogger.js": "./JexLogger.js",
+    "./JexInspector.js": "./JexInspector.js",
+    "./JexToast.js": "./JexToast.js"
+  },
+  "jsdelivr": "Jex.js",
+  "unpkg": "Jex.js"
+}

@@ -20,7 +20,7 @@
 - **Project Name:** Jex
 - **Ignored Paths:** LICENCE, -scanner.js, -Jex.txt, node_modules, .git, dist, build, .idea
 - **Accepted File Extensions:** .js, .css, .html, .jsx, .ts, .tsx, .json, .md
-- **Generated on:** 2025-09-12T07:57:09.786Z
+- **Generated on:** 2025-09-16T06:31:27.677Z
 - **Max File Size:** 10.00 MB
 - **Include Hashes:** Yes
 - **Include Line Count:** Yes
@@ -28,13 +28,15 @@
 ## 4. Directory Structure
 
 The following tree represents the complete project structure:Jex/
+├── util/
+├── .gitignore (17.00 B)
 ├── jex-logo.svg (5.50 KB)
-├── Jex.js (31.53 KB)
+├── Jex.js (31.59 KB)
 ├── JexInspector.js (17.51 KB)
 ├── JexLogger.js (24.11 KB)
 ├── JexToast.js (16.27 KB)
 ├── LICENSE (1.07 KB)
-└── README.md (9.04 KB)
+└── README.md (5.74 KB)
 
 
 
@@ -45,10 +47,10 @@ Below are the contents of all processed files in the project:
 ================================================================================
 FILE: Jex.js
 Type: JS
-Size: 31.53 KB
-Last Modified: 2025-09-11T09:12:41.514Z
-Lines: 1022
-MD5: ad3c6a418a7bd5a8f1af07eec63b1545
+Size: 31.59 KB
+Last Modified: 2025-09-12T08:11:35.886Z
+Lines: 1027
+MD5: 52d12dbd96d271e39af3a2289f47d71b
 ================================================================================
 
 /**
@@ -302,6 +304,11 @@ export class Jex {
             this.#ref.blur();
         }
         return this;
+    }
+
+    id(id)
+    {
+        return this.$(id)
     }
 
     /**
@@ -2879,22 +2886,143 @@ export const toast = new JexToast();
 ================================================================================
 FILE: README.md
 Type: MD
-Size: 9.04 KB
-Last Modified: 2025-09-11T09:12:41.516Z
-Lines: 329
-MD5: eb6d1a54507edad78bd9e2529ba85cf1
+Size: 5.74 KB
+Last Modified: 2025-09-12T08:00:45.449Z
+Lines: 194
+MD5: 8952a493b0375e1dac20981d4b9e92bb
 ================================================================================
 
 # Jex.js
 
-![Version](https://img.shields.io/badge/version-2025.07.02-blue.svg)
-![License](https://img.shields.io/badge/license-MIT-green.svg)
-![Size](https://img.shields.io/badge/size-~15kb-orange.svg)
-![Dependencies](https://img.shields.io/badge/dependencies-zero-brightgreen.svg)
+<img src="https://cdn.jsdelivr.net/gh/Bloechle/jex@latest/jex-logo.svg" alt="Jex.js Logo" width="200" />
 
-> Modern DOM manipulation library with jQuery-like syntax and zero dependencies
+> Lightweight DOM manipulation library with jQuery-like syntax and zero dependencies
 
-Jex.js provides an intuitive API for element selection, manipulation, and event handling while maintaining a small footprint and excellent performance.
+## Features
+
+- **Zero dependencies** - Pure JavaScript, no external requirements
+- **Small footprint** - ~15KB minified, optimized for performance
+- **jQuery-like syntax** - Familiar API for easy adoption
+- **Method chaining** - Fluent interface for cleaner code
+- **Modern ES6+** - Class-based architecture with full JSDoc support
+- **Universal** - Works with HTML, SVG elements, and all modern browsers
+
+## Quick Start
+
+```javascript
+import { jex } from 'https://cdn.jsdelivr.net/gh/Bloechle/jex@latest/Jex.js';
+
+// Element selection and manipulation
+jex.$('myButton').cls('+active').text('Click me!');
+
+// Create and mount elements
+jex.create('div')
+  .cls('+container +p-4')
+  .html('<h1>Hello World!</h1>')
+  .mountToBody();
+
+// Event handling with cleanup
+const cleanup = jex.onDocument('click', (e) => console.log('Clicked!'));
+```
+
+## Core API
+
+### Selection & Creation
+```javascript
+jex.$('elementId')                // Select by ID → Jex | null
+jex.$('?elementId')               // Check existence → boolean
+jex.select('.class')              // First match → Jex | null
+jex.find('.items')                // All matches → JexCollection
+jex.create('div', 'myId')         // Create element → Jex
+```
+
+### Content & Attributes
+```javascript
+element.text('content')           // Set/get text
+element.html('<p>content</p>')    // Set/get HTML
+element.value('input value')      // Set/get form values
+element.attr('id', 'value')       // Set/get attributes
+element.data('key', 'value')      // Set/get data-* attributes
+```
+
+### Classes & Styling
+```javascript
+element.cls('+add -remove ~toggle')  // Class manipulation
+element.cls('?exists')               // Check class → boolean
+element.style({color: 'red'})        // Set styles
+element.show() / element.hide()      // Visibility
+```
+
+### DOM Manipulation
+```javascript
+element.append(child1, child2)    // Add children
+element.prepend(content)          // Add at start
+element.mount(parent)             // Mount to parent
+element.remove()                  // Remove from DOM
+element.clear()                   // Clear children
+```
+
+### Events
+```javascript
+element.on('click', handler)         // Add listener
+element.onClick(handler)             // Convenient click
+element.delegate('click', '.btn', handler)  // Event delegation
+jex.onDocument('keydown', handler)   // Global document events
+jex.onKey('Ctrl+K', handler)         // Keyboard shortcuts
+```
+
+### Navigation
+```javascript
+element.parent()                  // Get parent → Jex
+element.siblings()                // Get siblings → JexCollection  
+element.next() / element.prev()   // Adjacent siblings → Jex
+element.closest('.selector')      // Find ancestor → Jex
+```
+
+## Collections
+
+Multi-element operations return `JexCollection` with batch methods:
+
+```javascript
+jex.find('.buttons')
+  .cls('+styled')
+  .on('click', handler)
+  .style({opacity: '0.8'});
+
+// Access individual elements
+const items = jex.find('.item');
+items.first().cls('+first');
+items.last().cls('+last');
+```
+
+## Complete Example
+
+```javascript
+import { jex } from 'https://cdn.jsdelivr.net/gh/Bloechle/jex@latest/Jex.js';
+
+// Create a modal dialog
+function createModal(title, message) {
+  return jex.create('div')
+    .cls('+fixed +inset-0 +bg-black +bg-opacity-50 +flex +items-center +justify-center +z-50')
+    .append(
+      jex.create('div')
+        .cls('+bg-white +p-6 +rounded-lg +max-w-md +w-full +mx-4')
+        .append(
+          jex.create('h2').text(title).cls('+text-xl +font-bold +mb-4'),
+          jex.create('p').text(message).cls('+text-gray-600 +mb-6'),
+          jex.create('button')
+            .text('Close')
+            .cls('+px-4 +py-2 +bg-blue-500 +text-white +rounded +hover:bg-blue-600')
+            .onClick(() => modal.remove())
+        )
+    )
+    .onClick((e) => e.target === modal.ref && modal.remove())
+    .mountToBody();
+}
+
+// Usage
+const modal = createModal('Success', 'Operation completed successfully!');
+```
 
 ## Installation
 
@@ -2902,338 +3030,82 @@ Jex.js provides an intuitive API for element selection, manipulation, and event 
 ```html
 <script type="module">
   import { jex } from 'https://cdn.jsdelivr.net/gh/Bloechle/jex@latest/Jex.js';
-  
-  // Select and manipulate elements
-  jex.$('myButton').cls('+active').text('Click me!');
-</script>
-```
-
-### Download
-Download `Jex.js` from the repository and include it in your project:
-```html
-<script type="module" src="./Jex.js">
-  import { jex } from './Jex.js';
   // Your code here
 </script>
 ```
 
-## Quick Start
+### Download
+```bash
+# Download individual files
+wget https://raw.githubusercontent.com/Bloechle/jex/main/Jex.js
 
+# Or clone the repository
+git clone https://github.com/Bloechle/jex.git
+```
+
+### Import
 ```javascript
+// ES6 modules
+import { jex, Jex, JexCollection } from './Jex.js';
+
+// Or from CDN
 import { jex } from 'https://cdn.jsdelivr.net/gh/Bloechle/jex@latest/Jex.js';
-
-// Select and manipulate elements
-jex.$('myButton').cls('+active').text('Click me!');
-
-// Create new elements
-const div = jex.create('div').cls('container').html('<p>Hello!</p>');
-
-// Event handling with automatic cleanup
-const cleanup = jex.onDocument('click', (e) => console.log('Clicked!'));
-
-// Method chaining
-jex.$('myContainer')
-  .find('.item')
-  .cls('+highlight')
-  .on('click', handler);
 ```
 
-## Key Features
+## Ecosystem
 
-- **Lightweight** - ~15KB minified, zero dependencies
-- **Familiar Syntax** - jQuery-like API for easy adoption
-- **Method Chaining** - Fluent interface for cleaner code
-- **Event Delegation** - Built-in delegation with automatic cleanup
-- **Universal** - Works with HTML and SVG elements
-- **Modern** - ES6+ class-based architecture
-- **TypeScript Ready** - Full JSDoc annotations
+The Jex framework includes additional components:
 
-## API Reference
-
-### Element Selection
+- **JexLogger.js** - Advanced console and logging system
+- **JexInspector.js** - Visual DOM element inspector
+- **JexToast.js** - Toast notification system
 
 ```javascript
-// Select by ID
-jex.$('elementId')                    // Returns Jex instance or null
-jex.$('?elementId')                   // Returns boolean (exists check)
+// Use the complete ecosystem
+import { jex } from 'https://cdn.jsdelivr.net/gh/Bloechle/jex@latest/Jex.js';
+import { logger } from 'https://cdn.jsdelivr.net/gh/Bloechle/jex@latest/JexLogger.js';
+import { toast } from 'https://cdn.jsdelivr.net/gh/Bloechle/jex@latest/JexToast.js';
 
-// Select by CSS selector
-jex.select('.className')              // First matching element
-jex.find('.items')                    // All matching children (JexCollection)
-
-// DOM traversal
-element.parent()                      // Get parent element
-element.children()                    // Get all children
-element.siblings()                    // Get siblings
-element.next()                        // Next sibling
-element.prev()                        // Previous sibling
-element.closest('.selector')          // Closest ancestor
-```
-
-### Element Creation
-
-```javascript
-// Create new elements
-const div = jex.create('div', 'myId');           // <div id="myId">
-const svg = jex.create('circle', null, true);    // SVG element
-
-// Create and append in one step
-const button = container.add('button', 'btnId'); // Creates and appends
-```
-
-### DOM Manipulation
-
-```javascript
-// Content manipulation
-element.html('<p>Hello</p>')          // Set/get innerHTML
-element.text('Hello World')           // Set/get textContent
-element.value('input value')          // Set/get input value
-element.clear()                       // Remove all children
-
-// Element insertion
-element.append(child1, child2, '<p>HTML</p>')   // Add to end
-element.prepend(child1, child2)                 // Add to beginning
-element.mount(parentElement)                    // Mount to parent
-element.mountToBody()                           // Mount to document.body
-```
-
-### Class Manipulation
-
-```javascript
-// Special syntax with prefixes
-element.cls('+active')                // Add class
-element.cls('-hidden')                // Remove class
-element.cls('~selected')              // Toggle class
-element.cls('?disabled')              // Check if has class (returns boolean)
-
-// Multiple classes
-element.cls('+active +visible -hidden')
-element.cls('class1', 'class2', '+class3')
-
-// Utility methods
-element.clearCls('newClass1', 'newClass2')      // Clear all, add new
-element.timeCls('flash', 1000)                  // Add class temporarily
-```
-
-### Attributes & Properties
-
-```javascript
-// Attributes
-element.attr('data-id', '123')        // Set attribute
-element.attr('data-id')               // Get attribute
-element.attr({id: 'test', class: 'btn'})  // Set multiple
-
-// Properties
-element.props('disabled', true)       // Set property
-element.props('disabled')             // Get property
-
-// Data attributes
-element.data('userId', '123')         // Set data-user-id="123"
-element.data('userId')                // Get data-user-id value
-```
-
-### Styling
-
-```javascript
-// CSS styles
-element.style('color', 'red')         // Set single style
-element.style({                       // Set multiple styles
-  color: 'red',
-  backgroundColor: 'blue',
-  fontSize: '16px'
-})
-
-// Dimensions
-element.dim('width', 300)             // Set width to 300px
-element.dim('width', '50%')           // Set width to 50%
-element.dim('height')                 // Get height
-
-// Visibility
-element.show()                        // Make visible
-element.hide()                        // Hide element
-element.isVisible()                   // Check if visible
-```
-
-### Event Handling
-
-```javascript
-// Basic events
-element.on('click', handler)          // Add event listener
-element.on('click', handler, {passive: true})  // With options
-element.off('click', handler)         // Remove specific handler
-element.off('click')                  // Remove all click handlers
-
-// Convenient click handler
-element.onClick(handler, {preventDefault: true})
-
-// Event delegation
-container.delegate('click', '.button', handler)
-
-// Global events
-const cleanup = jex.onDocument('click', handler)
-const cleanup2 = jex.onWindow('resize', handler)
-const cleanup3 = jex.onKey('Ctrl+K', handler)  // Keyboard shortcuts
-
-// Cleanup all listeners
-cleanup()
-cleanup2() 
-cleanup3()
-```
-
-## Examples
-
-### Basic Usage
-
-```javascript
-import { jex } from './Jex.js';
-
-// Create a dynamic button
-const button = jex.create('button', 'myBtn')
-  .text('Click me!')
-  .cls('+btn +btn-primary')
-  .onClick(() => alert('Hello!'))
-  .mountToBody();
-
-// Update existing elements
-jex.$('existingDiv')
-  .html('<p>Updated content</p>')
-  .cls('+updated')
-  .style({backgroundColor: '#f0f0f0'});
-```
-
-### Form Handling
-
-```javascript
-// Create a complete form
-const form = jex.create('form')
-  .cls('+space-y-4')
-  .append(
-    jex.create('input')
-      .attr({type: 'text', placeholder: 'Name', required: true})
-      .cls('+form-input'),
-    
-    jex.create('button')
-      .attr('type', 'submit')
-      .text('Submit')
-      .cls('+btn +btn-primary')
-  )
-  .on('submit', (e) => {
-    e.preventDefault();
-    const formData = new FormData(e.target);
-    console.log('Form data:', Object.fromEntries(formData));
-  })
-  .mountToBody();
-```
-
-### Event Delegation
-
-```javascript
-// Handle clicks on dynamic content
-jex.$('container').delegate('click', '.item', function(e) {
-  const item = jex.wrap ? jex.wrap(this) : new jex.constructor(this);
-  item.cls('~selected');
-  
-  if (item.cls('?deletable')) {
-    item.remove();
-  }
-});
-```
-
-### Modal Dialog
-
-```javascript
-function createModal(title, content) {
-  const modal = jex.create('div')
-    .cls('+fixed +inset-0 +bg-black +bg-opacity-50 +flex +items-center +justify-center')
-    .append(
-      jex.create('div')
-        .cls('+bg-white +p-6 +rounded-lg +max-w-md +w-full')
-        .append(
-          jex.create('h2').text(title).cls('+text-xl +font-bold +mb-4'),
-          jex.create('p').text(content).cls('+mb-4'),
-          jex.create('button')
-            .text('Close')
-            .cls('+btn +btn-primary')
-            .onClick(() => modal.remove())
-        )
-    )
-    .onClick((e) => {
-      if (e.target === modal.ref) modal.remove();
-    })
-    .mountToBody();
-  
-  return modal;
-}
-
-// Usage
-createModal('Welcome', 'Welcome to Jex.js!');
-```
-
-## Collections
-
-Jex.js automatically returns `JexCollection` for multi-element operations:
-
-```javascript
-// Find all buttons and add click handlers
-jex.find('.button').on('click', (e) => {
-  console.log('Button clicked:', e.target);
-});
-
-// Chain operations on collections
-jex.find('.item')
-  .cls('+processed')
-  .style({opacity: '0.8'})
-  .on('mouseenter', handler);
-
-// Access individual elements
-const buttons = jex.find('.button');
-buttons.first().cls('+first');
-buttons.last().cls('+last');
+logger.info('Application started');
+toast.success('Welcome to Jex.js!');
 ```
 
 ## Browser Support
 
 - **Chrome/Edge**: 80+
-- **Firefox**: 75+  
+- **Firefox**: 75+
 - **Safari**: 13+
 - **Mobile**: iOS 13+, Android 8+
-
-## Contributing
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
 
 ## License
 
 MIT License - see [LICENSE](LICENSE) file for details.
 
----
+## Links
 
-**Repository:** https://github.com/Bloechle/jex
-
+- **Repository**: https://github.com/Bloechle/jex
+- **Issues**: https://github.com/Bloechle/jex/issues
+- **CDN**: https://cdn.jsdelivr.net/gh/Bloechle/jex@latest/
 
 ## 6. Table of Contents
 
 | File | Type | Size | Lines |
 |------|------|------|-------|
-| Jex.js | JS | 31.53 KB | 1022 |
+| Jex.js | JS | 31.59 KB | 1027 |
 | JexInspector.js | JS | 17.51 KB | 526 |
 | JexLogger.js | JS | 24.11 KB | 704 |
 | JexToast.js | JS | 16.27 KB | 538 |
-| README.md | MD | 9.04 KB | 329 |
+| README.md | MD | 5.74 KB | 194 |
 
 
 ## 7. Summary Report
 
 ### Statistics
 - **Files Processed:** 5
-- **Files Skipped:** 63
-- **Total Size:** 98.46 KB
-- **Total Lines:** 3’119
-- **Processing Time:** 0.06 seconds
+- **Files Skipped:** 73
+- **Total Size:** 95.21 KB
+- **Total Lines:** 2’989
+- **Processing Time:** 0.21 seconds
 - **Errors:** 0
 - **Warnings:** 0
 
@@ -3242,9 +3114,9 @@ MIT License - see [LICENSE](LICENSE) file for details.
 - **MD:** 1 files (20.0%)
 
 ### Largest Files
-1. Jex.js - 31.53 KB
+1. Jex.js - 31.59 KB
 2. JexLogger.js - 24.11 KB
 3. JexInspector.js - 17.51 KB
 4. JexToast.js - 16.27 KB
-5. README.md - 9.04 KB
+5. README.md - 5.74 KB
 
